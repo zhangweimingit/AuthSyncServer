@@ -32,7 +32,8 @@ public:
 
 	bool is_mac_authed(unsigned gid, const std::string &mac, ClintAuthInfo &auth);
 
-	sync_db& get_db();
+	bool load_auth_info(void);
+	sync_db& get_db(void);
 
 private:
 	// Initiate an asynchronous accept operation.
@@ -46,7 +47,7 @@ private:
 
 	sync_db db_;
 
-	SyncAuth sync_auth_;
+	sync_auth sync_auth_;
 	// The number of threads that will call io_service::run().
 	std::size_t thread_pool_size_;
 

@@ -8,7 +8,7 @@
 
 #include "sync_msg.hpp"
 
-class SyncAuth {
+class sync_auth {
 public:
 	void insert_new_auth(const ClintAuthInfo &auth);
 	void erase_expired_auth(const ClintAuthInfo &auth);

@@ -6,7 +6,7 @@
 using namespace std;
 using namespace cppbase;
 
-void SyncAuth::insert_new_auth(const ClintAuthInfo &auth)
+void sync_auth::insert_new_auth(const ClintAuthInfo &auth)
 {
 	uint32_t index = auth.gid_ % SYNC_AUTH_SLOTS;
 	WRLockGuard<RWLock> lock(auth_locks_[index]);
@@ -14,7 +14,7 @@ void SyncAuth::insert_new_auth(const ClintAuthInfo &auth)
 	authed_macs_[index][auth.gid_][auth.mac_] = auth;
 }
 
-void SyncAuth::erase_expired_auth(const ClintAuthInfo &auth)
+void sync_auth::erase_expired_auth(const ClintAuthInfo &auth)
 {
 	uint32_t index = auth.gid_ % SYNC_AUTH_SLOTS;
 	WRLockGuard<RWLock> lock(auth_locks_[index]);
@@ -30,7 +30,7 @@ void SyncAuth::erase_expired_auth(const ClintAuthInfo &auth)
 	}
 }
 
-bool SyncAuth::is_mac_authed(unsigned gid, const string &mac, ClintAuthInfo &auth)
+bool sync_auth::is_mac_authed(unsigned gid, const string &mac, ClintAuthInfo &auth)
 {
 	uint32_t index = gid % SYNC_AUTH_SLOTS;
 	RDLockGuard<RWLock> lock(auth_locks_[index]);
