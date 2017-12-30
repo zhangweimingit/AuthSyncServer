@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <thread>
 #include "server.hpp"
+#include "base/utils/ik_logger.h"
 
 using namespace std;
 using boost::asio::ip::tcp;
