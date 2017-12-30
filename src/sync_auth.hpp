@@ -3,11 +3,12 @@
 
 #include <map>
 #include <string>
-#include <shared_mutex>
+
+#include "core/thread/pthread_lock.hpp"
+
 #include "sync_msg.hpp"
 
-class sync_auth 
-{
+class sync_auth {
 public:
 	void insert_new_auth(const ClintAuthInfo &auth);
 	void erase_expired_auth(const ClintAuthInfo &auth);
@@ -21,7 +22,7 @@ private:
 	//Query the authentication information of the corresponding group according to group ID 
 	//<gid,<mac,ClintAuthInfo>>
 	std::map<unsigned,std::map<std::string, ClintAuthInfo>> authed_macs_[SYNC_AUTH_SLOTS];
-	std::shared_mutex auth_locks_[SYNC_AUTH_SLOTS];
+	cppbase::RWLock auth_locks_[SYNC_AUTH_SLOTS];
 };
 
 #endif
