@@ -11,7 +11,6 @@
 #include "base/utils/ik_logger.h"
 
 #include "sync_config.hpp"
-#include "sync_server.hpp"
 #include "server.hpp"
 using namespace std;
 using namespace cppbase;
