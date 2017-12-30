@@ -28,6 +28,12 @@ public:
 	//put the conn back to pool  
 	void ReleaseConnection(sql::Connection *conn);
 
+	void insert_new_auth(const ClintAuthInfo &auth);
+
+	void erase_expired_auth(const ClintAuthInfo &auth);
+
+	bool is_mac_authed(unsigned gid, const std::string &mac, ClintAuthInfo &auth);
+
 	void load_auth_info(void);
 
 	~sync_db();

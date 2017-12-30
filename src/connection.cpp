@@ -142,7 +142,7 @@ void connection::do_process(boost::asio::yield_context yield)
 					data += sizeof(uint16_t);//gid
 					auth.gid_ = ntohl(*reinterpret_cast<const uint32_t*>(data));
 
-					if (sync_server_->is_mac_authed(auth.gid_, auth.mac_, auth))
+					if (sync_server_->get_db().is_mac_authed(auth.gid_, auth.mac_, auth))
 					{
 						if (time(NULL) - auth.auth_time_ < auth.duration_)
 						{
@@ -153,7 +153,7 @@ void connection::do_process(boost::asio::yield_context yield)
 						else
 						{
 							//There is no need to synchronize to the database,The timeout data will be deleted when the program is started
-							sync_server_->erase_expired_auth(auth);
+							sync_server_->get_db().erase_expired_auth(auth);
 							LOG_DBUG(" the req mac is expired  duration_");
 						}
 
@@ -195,26 +195,7 @@ void connection::do_process(boost::asio::yield_context yield)
 					auth.auth_time_ = time(NULL);
 					auth.duration_ = ntohl(*reinterpret_cast<const uint32_t*>(data));
 
-					sync_server_->insert_new_auth(auth);
-					try
-					{
-						sql::Connection *conn = sync_server_->get_db().GetConnection();
-						conn->setSchema(sync_config->db_database_);
-						shared_ptr<sql::Statement> stmt(conn->createStatement());
-						std::ostringstream os;
-						os << "replace into " << sync_config->db_table_
-							<< " (mac,attr,gid,auth_time,duration) values (" << "\'" << auth.mac_ << "\'," << auth.attr_ << ',' << auth.gid_ << "," << auth.auth_time_ << "," << auth.duration_ << ")";
-						stmt->executeUpdate(os.str());
-						sync_server_->get_db().ReleaseConnection(conn);
-					}
-					catch (sql::SQLException& e)
-					{
-						LOG_DBUG("insert into database error");
-					}
-					catch (std::runtime_error& e)
-					{
-						LOG_DBUG("insert into database");
-					}
+					sync_server_->get_db().insert_new_auth(auth);
 				}
 				else
 				{

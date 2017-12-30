@@ -25,12 +25,6 @@ public:
 	// Run the server's io_service loop.
 	void run();
 
-	void insert_new_auth(const ClintAuthInfo &auth);
-
-	void erase_expired_auth(const ClintAuthInfo &auth);
-
-	bool is_mac_authed(unsigned gid, const std::string &mac, ClintAuthInfo &auth);
-
 	sync_db& get_db(void);
 
 private:

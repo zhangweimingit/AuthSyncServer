@@ -72,20 +72,6 @@ void server::handle_stop()
 	io_service_.stop();
 }
 
-void server::insert_new_auth(const ClintAuthInfo &auth)
-{
-	sync_auth_.insert_new_auth(auth);
-}
-
-void server::erase_expired_auth(const ClintAuthInfo &auth)
-{
-	sync_auth_.erase_expired_auth(auth);
-}
-
-bool server::is_mac_authed(unsigned gid, const string &mac, ClintAuthInfo &auth)
-{
-	return sync_auth_.is_mac_authed(gid, mac, auth);
-}
 
 sync_db& server::get_db()
 {

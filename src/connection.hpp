@@ -17,6 +17,7 @@
 #include <boost/asio/spawn.hpp>
 #include "sync_msg.hpp"
 
+
 class server;
 
 // Represents a single connection from a client.
@@ -44,15 +45,6 @@ private:
 
 	//processing flow
 	void do_process(boost::asio::yield_context yield);
-
-	//Authenticate the client to be legal
-	void do_auth_client();
-
-	// Handle completion of a read operation.
-	void handle_read(const boost::system::error_code& e, std::size_t bytes_transferred);
-
-	// Handle completion of a write operation.
-	void handle_write(const boost::system::error_code& e, std::size_t bytes_transferred);
 
 	//Whether the client has passed the authentication
 	bool certified_ = false;

@@ -1,8 +1,9 @@
 #include <iostream>  
 #include <stdexcept>    
+#include <sstream>
 #include <exception>    
 #include <stdio.h>    
-#include "sync_db.hpp"  
+#include "sync_db.hpp"
 #include "sync_config.hpp"
 #include "base/utils/ik_logger.h"
 #include "base/utils/singleton.hpp"
@@ -153,6 +154,42 @@ void sync_db::DestoryConnection(Connection* conn)
 sync_db::~sync_db()
 {
 	DestoryConnPool();
+}
+
+void sync_db::insert_new_auth(const ClintAuthInfo &auth)
+{
+	memory_db_.insert_new_auth(auth);
+
+	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
+	try
+	{
+		Connection *conn = GetConnection();
+		conn->setSchema(sync_config->db_database_);
+		shared_ptr<Statement> stmt(conn->createStatement());
+		std::ostringstream os;
+		os << "replace into " << sync_config->db_table_
+			<< " (mac,attr,gid,auth_time,duration) values (" << "\'" << auth.mac_ << "\'," << auth.attr_ << ',' << auth.gid_ << "," << auth.auth_time_ << "," << auth.duration_ << ")";
+		stmt->executeUpdate(os.str());
+		ReleaseConnection(conn);
+	}
+	catch (sql::SQLException& e)
+	{
+		LOG_DBUG("insert into database error");
+	}
+	catch (std::runtime_error& e)
+	{
+		LOG_DBUG("insert into database");
+	}
+}
+
+void sync_db::erase_expired_auth(const ClintAuthInfo &auth)
+{
+	memory_db_.erase_expired_auth(auth);
+}
+
+bool sync_db::is_mac_authed(unsigned gid, const string &mac, ClintAuthInfo &auth)
+{
+	return memory_db_.is_mac_authed(gid, mac, auth);
 }
 
 void sync_db::load_auth_info(void)
