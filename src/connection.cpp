@@ -21,9 +21,9 @@
 #include "server.hpp"
 using namespace std;
 
- connection::pointer connection::create(boost::asio::io_service& io_service)
+ connection::pointer connection::create(boost::asio::io_service& io_service, server* server)
 {
-	return pointer(new connection(io_service));
+	return pointer(new connection(io_service, server));
 }
 
 connection::connection(boost::asio::io_service& io_service, server* server)
