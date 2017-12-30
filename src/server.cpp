@@ -15,6 +15,7 @@
 #include "sync_config.hpp"
 
 using namespace std;
+using namespace cppbase;
 using boost::asio::ip::tcp;
 
 server::server(const size_t port, size_t thread_pool_size, 
