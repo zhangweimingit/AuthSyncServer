@@ -12,7 +12,7 @@
 
 #include "sync_config.hpp"
 #include "sync_server.hpp"
-
+#include "server.hpp"
 using namespace std;
 using namespace cppbase;
 namespace po = boost::program_options;
@@ -66,24 +66,39 @@ int main(int argc, const char **argv)
 	reset_log_level(sync_config->log_level_.c_str());
 	LOG_DBUG("AuditSyncServer start 2");
 	
-	if (vm.count("daemon")) {
-		if (daemon(1, 1)) {
+	if (vm.count("daemon")) 
+	{
+		if (daemon(1, 1)) 
+		{
 			LOG_ERRO("daemon failed");
 			exit(1);
 		}
 		LOG_INFO("AuditSyncServer become a daemon service");
 	}
 
-	SyncServer sync_server(sync_config->ip_, sync_config->port_, sync_config->thread_cnt_,
-		sync_config->db_server_, sync_config->db_user_, sync_config->db_pwd_,
-		sync_config->rest_ip_, sync_config->rest_port_);
+	//SyncServer sync_server(sync_config->ip_, sync_config->port_, sync_config->thread_cnt_,
+	//	sync_config->db_server_, sync_config->db_user_, sync_config->db_pwd_,
+	//	sync_config->rest_ip_, sync_config->rest_port_);
 
-	if (!sync_server.init()) {
-		LOG_ERRO("Fail to init SyncServer");
-		exit(1);
+	//if (!sync_server.init()) {
+	//	LOG_ERRO("Fail to init SyncServer");
+	//	exit(1);
+	//}
+
+	//sync_server.start(NULL);
+
+	try
+	{
+		// Initialise the server.
+		server auth_server(sync_config->port_, sync_config->thread_cnt_);
+
+		// Run the server until stopped.
+		auth_server.run();
 	}
-
-	sync_server.start(NULL);
+	catch (const std::exception&e)
+	{
+		LOG_ERRO("exception:%s",e.what());
+	}
 
 	LOG_INFO("AuditSyncServer end");
 

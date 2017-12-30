@@ -6,8 +6,8 @@
 
 #include <cstring>
 
-#define CHAP_STR_LEN (32)
-#define MAC_STR_LEN	 (17)
+const unsigned CHAP_STR_LEN = 32;
+const unsigned MAC_STR_LEN = 17;
 
 //Note bytes alignment
 struct ClintAuthInfo {
