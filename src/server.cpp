@@ -14,8 +14,10 @@
 using namespace std;
 using boost::asio::ip::tcp;
 
-server::server(const size_t port, size_t thread_pool_size)
-	: thread_pool_size_(thread_pool_size),
+server::server(const size_t port, size_t thread_pool_size, 
+	std::string db_server, std::string db_user, std::string db_pwd)
+	: db_(db_server, db_user, db_pwd, thread_pool_size),
+	thread_pool_size_(thread_pool_size),
 	signals_(io_service_),
 	acceptor_(io_service_,tcp::endpoint(tcp::v4(), port))
 {

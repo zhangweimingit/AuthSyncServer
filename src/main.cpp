@@ -90,7 +90,8 @@ int main(int argc, const char **argv)
 	try
 	{
 		// Initialise the server.
-		server auth_server(sync_config->port_, sync_config->thread_cnt_);
+		server auth_server(sync_config->port_, sync_config->thread_cnt_,
+			sync_config->db_server_, sync_config->db_user_, sync_config->db_pwd_);
 
 		// Run the server until stopped.
 		auth_server.run();

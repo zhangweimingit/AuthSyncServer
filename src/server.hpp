@@ -20,7 +20,8 @@ class server: private boost::noncopyable
 {
 public:
 	// Construct the server to listen on the specified port,
-	explicit server(const std::size_t port, std::size_t thread_pool_size);
+	explicit server(const std::size_t port, std::size_t thread_pool_size,
+		std::string db_server, std::string db_user, std::string db_pwd);
 
 	// Run the server's io_service loop.
 	void run();
