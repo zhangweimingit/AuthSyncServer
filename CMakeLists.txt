@@ -14,13 +14,13 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-find_package(Boost REQUIRED COMPONENTS program_options system)
+find_package(Boost REQUIRED COMPONENTS program_options system coroutine)
 find_library(SSL_LIB libssl.a REQUIRED)
 find_library(CRYPTO_LIB libcrypto.a REQUIRED)
 find_library(MYSQL_CONN_LIB libmysqlcppconn.so REQUIRED)
 
 # compile options
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DBOOST_COROUTINES_V2")
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2")
 
