@@ -175,7 +175,7 @@ void connection::do_process(boost::asio::yield_context yield)
 					auto it = opts.find(CLIENT_AUTH);
 					if (it == opts.end())
 					{
-						LOG_ERRO("Conn(%s) didn't send client mac in cli_auth_res msg", conn->to_str());
+						LOG_ERRO("Conn() didn't send client mac in cli_auth_res msg");
 						break;
 					}
 
