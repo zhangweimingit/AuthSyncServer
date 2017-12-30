@@ -29,7 +29,7 @@ public:
 
 	void erase_expired_auth(const ClintAuthInfo &auth);
 
-	bool is_mac_authed(unsigned gid, const string &mac, ClintAuthInfo &auth);
+	bool is_mac_authed(unsigned gid, const std::string &mac, ClintAuthInfo &auth);
 
 	sync_db& get_db();
 
