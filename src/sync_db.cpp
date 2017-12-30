@@ -3,7 +3,9 @@
 #include <exception>    
 #include <stdio.h>    
 #include "sync_db.hpp"  
+#include "sync_config.hpp"
 #include "base/utils/ik_logger.h"
+#include "base/utils/singleton.hpp"
 
 using namespace std;  
 using namespace sql;  
@@ -151,4 +153,49 @@ void sync_db::DestoryConnection(Connection* conn)
 sync_db::~sync_db()
 {
 	DestoryConnPool();
+}
+
+void sync_db::load_auth_info(void)
+{
+	Connection *conn;
+
+	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
+
+	LOG_INFO("Load database begin");
+
+	conn = GetConnection();
+
+	if (conn)
+	{
+		int i = 0;
+		conn->setSchema(sync_config->db_database_);
+		shared_ptr<Statement> stmt1(conn->createStatement());
+		shared_ptr<Statement> stmt2(conn->createStatement());
+		shared_ptr<ResultSet> res(stmt1->executeQuery("select * from  " + sync_config->db_table_));
+
+		while (res->next())
+		{
+			ClintAuthInfo auth;
+			memcpy(auth.mac_, res->getString("mac").c_str(), MAC_STR_LEN);
+			auth.mac_[MAC_STR_LEN] = '\0';
+			auth.attr_ = res->getUInt("attr");
+			auth.gid_ = res->getUInt("gid");
+			auth.auth_time_ = res->getUInt("auth_time");
+			auth.duration_ = res->getUInt("duration");
+			if (time(NULL) - auth.auth_time_ > auth.duration_)
+			{
+				stmt2->executeUpdate("delete from " + sync_config->db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(auth.gid_));
+				continue;
+			}
+		memory_db_.insert_new_auth(auth);
+		i++;
+		}
+
+		ReleaseConnection(conn);
+		LOG_INFO("Load %d record from database", i);
+	}
+	else
+	{
+		LOG_ERRO("Load database failed");
+	}
 }

@@ -11,6 +11,7 @@
 #include "base/utils/ik_logger.h"
 
 #include "sync_config.hpp"
+#include "sync_db.hpp"
 #include "server.hpp"
 using namespace std;
 using namespace cppbase;
@@ -88,10 +89,10 @@ int main(int argc, const char **argv)
 
 	try
 	{
-		// Initialise the server.
-		server auth_server(sync_config->port_, sync_config->thread_cnt_, sync_config->db_server_, sync_config->db_user_, sync_config->db_pwd_);
+		sync_db database(sync_config->db_server_, sync_config->db_user_, sync_config->db_pwd_, sync_config->thread_cnt_);
+		database.load_auth_info();
 
-		// Run the server until stopped.
+		server auth_server(sync_config->port_, sync_config->thread_cnt_, database);
 		auth_server.run();
 	}
 	catch (const std::exception&e)

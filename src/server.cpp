@@ -18,9 +18,8 @@ using namespace std;
 using namespace cppbase;
 using boost::asio::ip::tcp;
 
-server::server(const size_t port, size_t thread_pool_size, 
-	std::string db_server, std::string db_user, std::string db_pwd)
-	: db_(db_server, db_user, db_pwd, thread_pool_size),
+server::server(const size_t port, size_t thread_pool_size,sync_db& db)
+	: db_(db),
 	thread_pool_size_(thread_pool_size),
 	signals_(io_service_),
 	acceptor_(io_service_,tcp::endpoint(tcp::v4(), port))
@@ -32,8 +31,6 @@ server::server(const size_t port, size_t thread_pool_size,
 	signals_.add(SIGHUP);
 
 	signals_.async_wait(bind(&server::handle_stop, this));
-
-	load_auth_info();
 
 	start_accept();
 }
@@ -93,65 +90,4 @@ bool server::is_mac_authed(unsigned gid, const string &mac, ClintAuthInfo &auth)
 sync_db& server::get_db()
 {
 	return db_;
-}
-
-bool server::load_auth_info(void)
-{
-	sql::Connection *conn;
-
-	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
-	try
-	{
-		LOG_INFO("Connect DB server successfully");
-
-		conn = db_.GetConnection();
-		
-		if (conn)
-		{
-			int i = 0;
-			conn->setSchema(sync_config->db_database_);
-			shared_ptr<sql::Statement> stmt1(conn->createStatement());
-			shared_ptr<sql::Statement> stmt2(conn->createStatement());
-			shared_ptr<sql::ResultSet> res(stmt1->executeQuery("select * from  " + sync_config->db_table_));
-
-			while (res->next())
-			{
-				ClintAuthInfo auth;
-				memcpy(auth.mac_, res->getString("mac").c_str(), MAC_STR_LEN);
-				auth.mac_[MAC_STR_LEN] = '\0';
-				auth.attr_ = res->getUInt("attr");
-				auth.gid_  = res->getUInt("gid");
-				auth.auth_time_ = res->getUInt("auth_time");
-				auth.duration_ = res->getUInt("duration");
-				if (time(NULL) - auth.auth_time_ > auth.duration_)
-				{
-					stmt2->executeUpdate("delete from " + sync_config->db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(auth.gid_));
-					continue;
-				}
-				insert_new_auth(auth);
-				i++;
-			}
-
-			db_.ReleaseConnection(conn);
-			LOG_INFO("Load %d record from database", i);
-		}
-		else
-		{
-			LOG_ERRO("Load database failed");
-			return false;
-		}
-
-	}
-	catch (sql::SQLException& e)
-	{
-		LOG_ERRO("Fail to connect DB server");
-		return false;
-	}
-	catch (std::runtime_error& e)
-	{
-		LOG_ERRO("Fail to connect DB server");
-		return false;;
-	}
-
-	return true;
 }

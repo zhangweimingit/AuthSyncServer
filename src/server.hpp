@@ -20,8 +20,7 @@ class server: private boost::noncopyable
 {
 public:
 	// Construct the server to listen on the specified port,
-	explicit server(const std::size_t port, std::size_t thread_pool_size,
-		std::string db_server, std::string db_user, std::string db_pwd);
+	explicit server(const std::size_t port, std::size_t thread_pool_size,sync_db& db);
 
 	// Run the server's io_service loop.
 	void run();
@@ -32,7 +31,6 @@ public:
 
 	bool is_mac_authed(unsigned gid, const std::string &mac, ClintAuthInfo &auth);
 
-	bool load_auth_info(void);
 	sync_db& get_db(void);
 
 private:
@@ -45,7 +43,7 @@ private:
 	// Handle a request to stop the server.
 	void handle_stop();
 
-	sync_db db_;
+	sync_db& db_;
 
 	sync_auth sync_auth_;
 	// The number of threads that will call io_service::run().
