@@ -42,9 +42,6 @@ private:
 	//Check whether the header is correct
 	bool decode_header();
 
-	//Check whether the header is correct
-	bool decode_header();
-
 	//processing flow
 	void do_process(boost::asio::yield_context yield);
 
