@@ -14,7 +14,6 @@
 #include <boost/asio.hpp>
 #include <string>
 #include "connection.hpp"
-#include "sync_auth.hpp"
 #include "sync_db.hpp"
 class server: private boost::noncopyable
 {
