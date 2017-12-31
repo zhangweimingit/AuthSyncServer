@@ -145,7 +145,7 @@ void connection::do_auth_response(DataOption& opts, boost::asio::yield_context& 
 			throw std::runtime_error("invalid chap_res");
 		}
 
-		auto it = opts.find(CLIENT_MAC);
+		it = opts.find(CLIENT_MAC);
 		if (it == opts.end())
 		{
 			throw std::runtime_error("do auth response failed!,no CLIENT_MAC");
