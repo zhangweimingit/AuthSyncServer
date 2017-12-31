@@ -196,7 +196,8 @@ void connection::do_process(boost::asio::yield_context yield)
 					auth.auth_time_ = time(NULL);
 					auth.duration_ = ntohl(*reinterpret_cast<const uint32_t*>(data));
 
-					sync_server_->get_db().insert_new_auth(auth);
+					auth_group_->insert(auth);
+					sync_server_->get_db().insert(auth);
 				}
 				else
 				{
