@@ -17,9 +17,8 @@
 #include <boost/asio/spawn.hpp>
 #include "sync_msg.hpp"
 
-
 class server;
-
+class auth_group;
 // Represents a single connection from a client.
 class connection
 	: public std::enable_shared_from_this<connection>,
@@ -36,6 +35,8 @@ public:
 
 	// Start the first asynchronous operation for the connection.
 	void start();
+
+	void deliver(const ClintAuthInfo& auth);
 private:
 	// Construct a connection with the given io_service.
 	connection(boost::asio::io_service& io_service,server* server);
@@ -45,6 +46,8 @@ private:
 
 	//processing flow
 	void do_process(boost::asio::yield_context yield);
+
+
 
 	//Whether the client has passed the authentication
 	bool certified_ = false;
@@ -64,6 +67,7 @@ private:
 
 	RawData send_buffer_;
 
+	auth_group *auth_group_;
 	server *sync_server_;
 };
 #endif // CONNECTION_HPP

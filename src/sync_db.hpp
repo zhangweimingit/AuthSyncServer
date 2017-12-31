@@ -4,6 +4,7 @@
 #include <iostream>  
 #include <string>
 #include <mutex>
+#include <map>
 #include <mysql_connection.h>    
 #include <mysql_driver.h>    
 #include <cppconn/exception.h>    
@@ -14,7 +15,7 @@
 #include <cppconn/statement.h>      
 #include <list>
 #include "base/utils/noncopyable.hpp"
-#include "sync_auth.hpp"
+#include "auth_group.hpp"
  
 class sync_db:cppbase::noncopyable
 {
@@ -28,13 +29,11 @@ public:
 	//put the conn back to pool  
 	void ReleaseConnection(sql::Connection *conn);
 
-	void insert_new_auth(const ClintAuthInfo &auth);
-
-	void erase_expired_auth(const ClintAuthInfo &auth);
-
-	bool is_mac_authed(unsigned gid, const std::string &mac, ClintAuthInfo &auth);
-
 	void load_auth_info(void);
+
+	void insert(const ClintAuthInfo &auth);
+
+	auth_group& group(unsigned gid);
 
 	~sync_db();
 
@@ -61,7 +60,7 @@ private:
 	sql::Driver* driver_;     //sql driver (the sql will free it)  
 	std::list<sql::Connection*> connList_;   //create conn list  
 
-	sync_auth memory_db_;
+	std::map<unsigned,auth_group> memory_db_;
 	//thread lock mutex  
 	std::mutex lock_;
 };

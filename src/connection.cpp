@@ -99,19 +99,30 @@ void connection::do_process(boost::asio::yield_context yield)
 			}
 			break;
 			case AUTH_RESPONSE:
-				if (!certified_)
+				if (!certified_ && opts.count(CHAP_RES) && opts.count(CLIENT_MAC))
 				{
 					auto it = opts.find(CHAP_RES);
-					if (it == opts.end())
-					{
-						throw std::runtime_error("no chap_res");
-					}
-
 					if (!validate_chap_str(it->second, chap_req_, sync_config->client_pwd_))
 					{
 						throw std::runtime_error("invalid chap_res");
 					}
-					certified_ = true;;
+
+					it = opts.find(CLIENT_MAC);
+					const char* data = it->second.c_str();
+
+					ClintAuthInfo auth;
+
+					memcpy(auth.mac_, data, MAC_STR_LEN);
+					auth.mac_[MAC_STR_LEN] = '\0';
+
+					data += MAC_STR_LEN;//attr
+
+					data += sizeof(uint16_t);//gid
+					auth.gid_ = ntohl(*reinterpret_cast<const uint32_t*>(data));
+					auth_group_ = &sync_server_->get_db().group(auth.gid_);
+
+					certified_ = true;
+
 					LOG_DBUG("status become CONN_AUTHED");
 				}
 				else
@@ -142,21 +153,11 @@ void connection::do_process(boost::asio::yield_context yield)
 					data += sizeof(uint16_t);//gid
 					auth.gid_ = ntohl(*reinterpret_cast<const uint32_t*>(data));
 
-					if (sync_server_->get_db().is_mac_authed(auth.gid_, auth.mac_, auth))
+					if (auth_group_->authed(auth))
 					{
-						if (time(NULL) - auth.auth_time_ < auth.duration_)
-						{
-							data_len = construct_sync_cli_auth_res_msg(auth, send_buffer_);
-							boost::asio::async_write(socket_, boost::asio::buffer(send_buffer_.data_, data_len), yield);
-							LOG_DBUG("the req mac is authed by attr");
-						}
-						else
-						{
-							//There is no need to synchronize to the database,The timeout data will be deleted when the program is started
-							sync_server_->get_db().erase_expired_auth(auth);
-							LOG_DBUG(" the req mac is expired  duration_");
-						}
-
+						data_len = construct_sync_cli_auth_res_msg(auth, send_buffer_);
+						boost::asio::async_write(socket_, boost::asio::buffer(send_buffer_.data_, data_len), yield);
+						LOG_DBUG("the req mac is authed by attr");
 					}
 					else
 					{
@@ -230,4 +231,14 @@ bool connection::decode_header()
 		return false;
 	}
 	return true;
+}
+
+void connection::deliver(const ClintAuthInfo& auth)
+{
+	auto self(shared_from_this());
+	strand_.dispatch([self, auth]()
+	{
+		size_t data_len = construct_sync_cli_auth_res_msg(auth, self->send_buffer_);
+		boost::asio::async_write(self->socket_, boost::asio::buffer(self->send_buffer_.data_, data_len), []() {});
+	});
 }

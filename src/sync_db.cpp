@@ -52,12 +52,7 @@ Connection* sync_db::CreateConnection()
 		conn = driver_->connect(url_, user_, password_);  //create a conn   
 		return conn;
 	}
-	catch (sql::SQLException& e)
-	{
-		LOG_DBUG("create conn error");
-		return nullptr;
-	}
-	catch (std::runtime_error& e)
+	catch (std::exception& e)
 	{
 		LOG_DBUG("create conn error");
 		return nullptr;
@@ -139,10 +134,6 @@ void sync_db::DestoryConnection(Connection* conn)
 		{
 			conn->close();
 		}
-		catch (sql::SQLException&e)
-		{
-			cerr << e.what() << endl;
-		}
 		catch (std::exception& e)
 		{
 			cerr << e.what() << endl;
@@ -156,10 +147,8 @@ sync_db::~sync_db()
 	DestoryConnPool();
 }
 
-void sync_db::insert_new_auth(const ClintAuthInfo &auth)
+void sync_db::insert(const ClintAuthInfo &auth)
 {
-	memory_db_.insert_new_auth(auth);
-
 	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
 	try
 	{
@@ -172,39 +161,22 @@ void sync_db::insert_new_auth(const ClintAuthInfo &auth)
 		stmt->executeUpdate(os.str());
 		ReleaseConnection(conn);
 	}
-	catch (sql::SQLException& e)
+	catch (std::exception& e)
 	{
 		LOG_DBUG("insert into database error");
 	}
-	catch (std::runtime_error& e)
-	{
-		LOG_DBUG("insert into database");
-	}
-}
-
-void sync_db::erase_expired_auth(const ClintAuthInfo &auth)
-{
-	memory_db_.erase_expired_auth(auth);
-}
-
-bool sync_db::is_mac_authed(unsigned gid, const string &mac, ClintAuthInfo &auth)
-{
-	return memory_db_.is_mac_authed(gid, mac, auth);
 }
 
 void sync_db::load_auth_info(void)
 {
+	LOG_INFO("Load database begin");
 	Connection *conn;
-
 	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
 
-	LOG_INFO("Load database begin");
-
 	conn = GetConnection();
-
 	if (conn)
 	{
-		int i = 0;
+		unsigned count = 0;
 		conn->setSchema(sync_config->db_database_);
 		shared_ptr<Statement> stmt1(conn->createStatement());
 		shared_ptr<Statement> stmt2(conn->createStatement());
@@ -216,23 +188,28 @@ void sync_db::load_auth_info(void)
 			memcpy(auth.mac_, res->getString("mac").c_str(), MAC_STR_LEN);
 			auth.mac_[MAC_STR_LEN] = '\0';
 			auth.attr_ = res->getUInt("attr");
-			auth.gid_ = res->getUInt("gid");
+			auth.gid_  = res->getUInt("gid");
 			auth.auth_time_ = res->getUInt("auth_time");
 			auth.duration_ = res->getUInt("duration");
-			if (time(NULL) - auth.auth_time_ > auth.duration_)
+			if (time(NULL) - auth.auth_time_ >= auth.duration_)
 			{
 				stmt2->executeUpdate("delete from " + sync_config->db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(auth.gid_));
 				continue;
 			}
-		memory_db_.insert_new_auth(auth);
-		i++;
+			memory_db_[auth.gid_].insert(auth);
+			count++;
 		}
-
 		ReleaseConnection(conn);
-		LOG_INFO("Load %d record from database", i);
+		LOG_INFO("Load %d record from database", count);
 	}
 	else
 	{
-		LOG_ERRO("Load database failed");
+		LOG_ERRO("Load database failed!!");
 	}
+}
+
+auth_group& sync_db::group(unsigned gid)
+{
+	lock_guard<mutex> guard(lock_);
+	return memory_db_[gid];
 }
