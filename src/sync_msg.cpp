@@ -33,12 +33,13 @@ uint32_t construct_sync_cli_auth_res_msg(const ClintAuthInfo &auth, char* buffer
 {
 	DataOption opts;
 
-	ClintAuthInfo auth_copy = auth;
-	auth_copy.attr_ = htons(auth.attr_);
-	auth_copy.gid_  = htonl(auth.gid_);
-	auth_copy.duration_ = auth.duration_ - (time(NULL) - auth.auth_time_);
-	auth_copy.duration_ = htonl(auth_copy.duration_);
-	string data(reinterpret_cast<char*>(&auth_copy),sizeof(ClintAuthInfo));
+	string data(reinterpret_cast<const char*>(&auth), sizeof(ClintAuthInfo));
+	ClintAuthInfo *auth_copy = reinterpret_cast<ClintAuthInfo*>(&data[0]);
+	auth_copy->attr_ = htons(auth.attr_);
+	auth_copy->gid_  = htonl(auth.gid_);
+	auth_copy->duration_ = auth.duration_ - (time(NULL) - auth.auth_time_);
+	auth_copy->duration_ = htonl(auth_copy->duration_);
+
 	opts.insert(make_pair(CLIENT_AUTH, data));
 
 	return construct_sync_msg(CLI_AUTH_RES, opts, buffer);

@@ -4,13 +4,12 @@
 #include <map>
 #include <string>
 
-#include <cstring>
-
 const unsigned CHAP_STR_LEN = 32;
 const unsigned MAC_STR_LEN = 17;
 
 //Note bytes alignment
-struct ClintAuthInfo {
+struct ClintAuthInfo 
+{
 	char mac_[MAC_STR_LEN + 1]; /*MAC_STR_LEN = 17*/
 	uint16_t attr_;
 	uint32_t gid_;              /*The server uses this field*/
@@ -18,12 +17,14 @@ struct ClintAuthInfo {
 	uint32_t auth_time_;       /*The server uses this field*/
 };
 
-enum SyncMsgVer {
+enum SyncMsgVer 
+{
 	MSG_INVALID_VERSION,
 	SYNC_MSG_VER1,
 };
 
-enum MsgType {
+enum MsgType
+{
 	MSG_INVALID_TYPE,
 
 	AUTH_REQUEST,
@@ -35,14 +36,16 @@ enum MsgType {
 	MSG_TYPE_NR
 };
 
-struct SyncMsgHeader {
+struct SyncMsgHeader 
+{
 	uint8_t version_;
 	uint8_t type_;
 	uint16_t len_; //Don't include the header
 	uint16_t res_; // reserve
 };
 
-enum DataType {
+enum DataType 
+{
 	DATA_INVALID_TYPE,
 	CHAP_STR,
 	CHAP_RES,
@@ -52,7 +55,8 @@ enum DataType {
 	DATA_TYPE_NR
 };
 
-struct TLVData {
+struct TLVData
+{
 	uint16_t type_;
 	uint16_t len_; // Don't include type & len
 	uint8_t data_[0];

@@ -84,7 +84,7 @@ void connection::do_check_client(boost::asio::yield_context& yield)
 void connection::do_read_header(boost::asio::yield_context& yield)
 {
 	//read_header
-	size_t n = boost::asio::async_read(socket_, boost::asio::buffer(recv_buffer_, sizeof(SyncMsgHeader)), yield);
+	boost::asio::async_read(socket_, boost::asio::buffer(recv_buffer_, sizeof(SyncMsgHeader)), yield);
 
 	header_ = *reinterpret_cast<SyncMsgHeader*>(recv_buffer_.data());
 	header_.len_ = ntohs(header_.len_);
@@ -224,7 +224,7 @@ void connection::deliver(const ClintAuthInfo& auth)
 {
 
 	auto self(shared_from_this());
-	strand_.dispatch([self, &auth]()
+	strand_.dispatch([self, auth]()
 	{
 		size_t data_len = construct_sync_cli_auth_res_msg(auth, self->send_buffer_.data());
 		boost::asio::async_write(self->socket_, boost::asio::buffer(self->send_buffer_, data_len),
