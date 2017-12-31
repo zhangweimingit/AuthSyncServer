@@ -120,7 +120,7 @@ void connection::do_process(boost::asio::yield_context yield)
 					data += sizeof(uint16_t);//gid
 					auth.gid_ = ntohl(*reinterpret_cast<const uint32_t*>(data));
 					auth_group_ = &sync_server_->get_db().group(auth.gid_);
-
+					auth_group_->join(shared_from_this());
 					certified_ = true;
 
 					LOG_DBUG("status become CONN_AUTHED");
