@@ -236,10 +236,12 @@ bool connection::decode_header()
 
 void connection::deliver(const ClintAuthInfo& auth)
 {
+
 	auto self(shared_from_this());
 	strand_.dispatch([self, auth]()
 	{
 		size_t data_len = construct_sync_cli_auth_res_msg(auth, self->send_buffer_);
-		boost::asio::async_write(self->socket_, boost::asio::buffer(self->send_buffer_.data_, data_len), []() {});
+		boost::asio::async_write(self->socket_, boost::asio::buffer(self->send_buffer_.data_, data_len),
+			[](const boost::system::error_code&ec,size_t) {});
 	});
 }
