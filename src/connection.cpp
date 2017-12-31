@@ -67,9 +67,9 @@ void connection::do_process(boost::asio::yield_context yield)
 	}
 	catch (std::exception& e)
 	{
-		LOG_ERRO("exception:%s",e.what());
-		socket_.close();
+		LOG_ERRO("Conn(%s) exception:%s ",to_string().c_str(),e.what());
 		auth_group_->leave(shared_from_this());
+		socket_.close();
 	}
 
 }
@@ -191,11 +191,11 @@ void connection::do_cli_auth_request(DataOption& opts, boost::asio::yield_contex
 		{
 			size_t data_len = construct_sync_cli_auth_res_msg(auth, send_buffer_.data());
 			boost::asio::async_write(socket_, boost::asio::buffer(send_buffer_, data_len), yield);
-			LOG_DBUG("conn(%s) the req mac(%s) is authed by attr(%d)", to_string(), auth.mac_, auth.attr_);
+			LOG_DBUG("conn(%s) the req mac(%s) is authed by attr(%d)", to_string().c_str(), auth.mac_, auth.attr_);
 		}
 		else
 		{
-			LOG_DBUG("conn(%s) mac(%s) fail to find auth info", to_string(), auth.mac_);
+			LOG_DBUG("conn(%s) mac(%s) fail to find auth info", to_string().c_str(), auth.mac_);
 		}
 	}
 	else
@@ -206,7 +206,7 @@ void connection::do_cli_auth_request(DataOption& opts, boost::asio::yield_contex
 
 void connection::do_cli_auth_response(DataOption& opts, boost::asio::yield_context& yield)
 {
-	LOG_DBUG("Conn(%s) send client_auth_res msg", to_string().c_str());
+	LOG_DBUG("Conn(%s) recv client_auth_res msg", to_string().c_str());
 	if (certified_)
 	{
 		auto it = opts.find(CLIENT_AUTH);
