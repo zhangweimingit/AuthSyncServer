@@ -31,10 +31,8 @@ void auth_group::insert(const ClintAuthInfo& auth)
 {
 	lock_guard<mutex> lock(mutex_);
 
-	LOG_DBUG("sizes(%s)b", auth.mac_);
-	LOG_DBUG("size(%d)b", recent_auth_.size());
 	recent_auth_[auth.mac_] = auth;
-	LOG_DBUG("size(%d)e", recent_auth_.size());
+
 	for (auto participant : participants_)
 		participant->deliver(auth);
 }
@@ -55,12 +53,13 @@ bool auth_group::authed(ClintAuthInfo &auth)
 
 	if (recent_auth_.count(auth.mac_))
 	{
+		auth = recent_auth_[auth.mac_];
+
 		if (time(NULL) - auth.auth_time_ >= auth.duration_)
 		{
 			recent_auth_.erase(auth.mac_);
 			return false;
 		}
-		auth = recent_auth_[auth.mac_];
 		return true;
 	}
 	return false;
