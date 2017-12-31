@@ -167,7 +167,7 @@ void sync_db::insert(const ClintAuthInfo &auth)
 	}
 }
 
-void sync_db::load_auth_info(void)
+void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 {
 	LOG_INFO("Load database begin");
 	Connection *conn;
@@ -196,7 +196,7 @@ void sync_db::load_auth_info(void)
 				stmt2->executeUpdate("delete from " + sync_config->db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(auth.gid_));
 				continue;
 			}
-			memory_db_[auth.gid_].insert(auth);
+			memory_db[auth.gid_].insert(auth);
 			count++;
 		}
 		ReleaseConnection(conn);
@@ -206,10 +206,4 @@ void sync_db::load_auth_info(void)
 	{
 		LOG_ERRO("Load database failed!!");
 	}
-}
-
-auth_group& sync_db::group(unsigned gid)
-{
-	lock_guard<mutex> guard(lock_);
-	return memory_db_[gid];
 }

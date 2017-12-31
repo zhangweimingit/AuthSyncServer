@@ -2,17 +2,26 @@
 
 using namespace std;
 
-void auth_group::join(connection::pointer participant)
+void auth_group::join(connection_ptr participant)
 {
 	lock_guard<mutex> lock(mutex_);
 	
 	participants_.insert(participant);
 
-	for (auto auth : recent_auth_)
-		participant->deliver(auth.second);
+	for(auto it = recent_auth_.begin();it!= recent_auth_.end();)
+    {
+		if (time(NULL) - it->second.auth_time_ >= it->second.duration_)
+		{
+			it = recent_auth_.erase(it);
+		} 
+		else
+		{
+			participant->deliver((it++)->second);
+		 }
+     }
 }
 
-void auth_group::leave(connection::pointer participant)
+void auth_group::leave(connection_ptr participant)
 {
 	lock_guard<mutex> lock(mutex_);
 	participants_.erase(participant);

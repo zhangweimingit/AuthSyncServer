@@ -29,11 +29,9 @@ public:
 	//put the conn back to pool  
 	void ReleaseConnection(sql::Connection *conn);
 
-	void load_auth_info(void);
+	void load_auth_info(std::map<unsigned, auth_group>& memory_db);
 
 	void insert(const ClintAuthInfo &auth);
-
-	auth_group& group(unsigned gid);
 
 	~sync_db();
 
@@ -60,7 +58,7 @@ private:
 	sql::Driver* driver_;     //sql driver (the sql will free it)  
 	std::list<sql::Connection*> connList_;   //create conn list  
 
-	std::map<unsigned,auth_group> memory_db_;
+
 	//thread lock mutex  
 	std::mutex lock_;
 };

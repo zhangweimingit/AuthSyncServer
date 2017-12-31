@@ -10,9 +10,9 @@ using boost::asio::ip::tcp;
 class auth_group
 {
 public:
-	void join(connection::pointer participant);
+	void join(connection_ptr participant);
 
-	void leave(connection::pointer participant);
+	void leave(connection_ptr participant);
 
 	void insert(const ClintAuthInfo& auth);
 
@@ -22,6 +22,6 @@ public:
 
 private:
 	std::map<std::string, ClintAuthInfo> recent_auth_;
-	std::set<connection::pointer> participants_;
+	std::set<connection_ptr> participants_;
 	std::mutex mutex_;
 };

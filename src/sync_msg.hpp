@@ -60,27 +60,13 @@ struct TLVData {
 
 typedef std::multimap<uint16_t, std::string> DataOption;
 
-struct SyncMsg {
-	SyncMsgHeader header_;
-	DataOption opts_;
-};
 
-struct RawData {
-	union {
-		SyncMsgHeader header_;
-		uint8_t data_[1024];
-	};
-};
-
-extern uint32_t constuct_sync_auth_req_msg(const std::string &chap_req, RawData &raw_data);
-extern uint32_t construct_sync_auth_res_msg(const std::string &chap_res, RawData &raw_data);
-
-extern uint32_t construct_sync_cli_auth_req_msg(const char mac[MAC_STR_LEN], RawData &raw_data);
-extern uint32_t construct_sync_cli_auth_res_msg(const ClintAuthInfo &auth, RawData &raw_data);
-
+extern uint32_t constuct_sync_auth_req_msg(const std::string &chap_req, char* buffer);
+extern uint32_t construct_sync_auth_res_msg(const std::string &chap_res, char* buffer);
+extern uint32_t construct_sync_cli_auth_res_msg(const ClintAuthInfo &auth, char* buffer);
 
 extern bool validate_sync_msg_header(const SyncMsgHeader &header);
-extern bool parse_tlv_data(const uint8_t *data, uint32_t data_len, DataOption &opts);
+extern bool parse_tlv_data(const char *data, uint32_t data_len, DataOption &opts);
 extern bool validate_chap_str(const std::string &res, const std::string &req, const std::string &pwd);
 
 #endif

@@ -13,6 +13,7 @@
 
 #include <boost/asio.hpp>
 #include <string>
+#include <mutex>
 #include "connection.hpp"
 #include "sync_db.hpp"
 class server: private boost::noncopyable
@@ -24,19 +25,23 @@ public:
 	// Run the server's io_service loop.
 	void run();
 
-	sync_db& get_db(void);
+	sync_db& get_db();
+
+	auth_group& group(unsigned gid);
 
 private:
 	// Initiate an asynchronous accept operation.
 	void start_accept();
 
 	// Handle completion of an asynchronous accept operation.
-	void handle_accept(const boost::system::error_code& e, connection::pointer conn);
+	void handle_accept(const boost::system::error_code& e);
 
 	// Handle a request to stop the server.
 	void handle_stop();
 
-	sync_db& db_;
+	sync_db& mysql_db_;
+
+	std::map<unsigned, auth_group> memory_db_;
 
 	// The number of threads that will call io_service::run().
 	std::size_t thread_pool_size_;
@@ -49,5 +54,10 @@ private:
 
 	// Acceptor used to listen for incoming connections.
 	boost::asio::ip::tcp::acceptor acceptor_;
+
+	// The next socket to be accepted.
+	boost::asio::ip::tcp::socket socket_;
+
+	std::mutex mutex_;
 };
 #endif // SERVER_HPP

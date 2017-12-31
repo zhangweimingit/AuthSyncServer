@@ -19,10 +19,11 @@ using namespace cppbase;
 using boost::asio::ip::tcp;
 
 server::server(const size_t port, size_t thread_pool_size,sync_db& db)
-	: db_(db),
+	: mysql_db_(db),
 	thread_pool_size_(thread_pool_size),
 	signals_(io_service_),
-	acceptor_(io_service_,tcp::endpoint(tcp::v4(), port))
+	acceptor_(io_service_,tcp::endpoint(tcp::v4(), port)),
+	socket_(io_service_)
 {
 	// Register to handle the signals that indicate when the server should exit.
 	signals_.add(SIGINT);
@@ -37,6 +38,8 @@ server::server(const size_t port, size_t thread_pool_size,sync_db& db)
 
 void server::run()
 {
+	mysql_db_.load_auth_info(memory_db_);
+
 	// Create a pool of threads to run all of the io_services.
 	vector<shared_ptr<thread> > threads;
 	for (size_t i = 0; i < thread_pool_size_; ++i)
@@ -52,15 +55,14 @@ void server::run()
 
 void server::start_accept()
 {
-	auto new_connection_ = connection::create(io_service_,this);
-	acceptor_.async_accept(new_connection_->socket(),
-		bind(&server::handle_accept, this, placeholders::_1, new_connection_));
+	acceptor_.async_accept(socket_,bind(&server::handle_accept, this, placeholders::_1));
 }
 
-void server::handle_accept(const boost::system::error_code& e, connection::pointer conn)
+void server::handle_accept(const boost::system::error_code& e)
 {
 	if (!e)
 	{
+		auto conn = std::make_shared<connection>();
 		conn->start();
 	}
 
@@ -72,8 +74,13 @@ void server::handle_stop()
 	io_service_.stop();
 }
 
-
 sync_db& server::get_db()
 {
-	return db_;
+	return mysql_db_;
+}
+
+auth_group& server::group(unsigned gid)
+{
+	lock_guard<mutex> lock(mutex_);
+	return memory_db_[gid];
 }
