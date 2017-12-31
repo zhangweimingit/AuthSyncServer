@@ -151,7 +151,7 @@ void connection::do_auth_response(DataOption& opts, boost::asio::yield_context& 
 			throw std::runtime_error("do auth response failed!,no CLIENT_MAC");
 		}
 
-		ClintAuthInfo auth = *reinterpret_cast<const ClintAuthInfo*>(it->second.c_str());
+		ClintAuthInfo auth = *reinterpret_cast<const ClintAuthInfo*>(it->second.data());
 		auth.gid_ = ntohl(auth.gid_);
 		auth_group_ = &(sync_server_->group(auth.gid_));
 		auth_group_->join(shared_from_this());
@@ -175,7 +175,7 @@ void connection::do_cli_auth_request(DataOption& opts, boost::asio::yield_contex
 			throw std::runtime_error("do cli auth request failed!,no CLIENT_MAC");
 		}
 
-		ClintAuthInfo auth = *reinterpret_cast<const ClintAuthInfo*>(it->second.c_str());
+		ClintAuthInfo auth = *reinterpret_cast<const ClintAuthInfo*>(it->second.data());
 
 		if (auth_group_->authed(auth))
 		{
@@ -205,7 +205,7 @@ void connection::do_cli_auth_response(DataOption& opts, boost::asio::yield_conte
 			throw std::runtime_error("do cli auth response failed!,no CLIENT_AUTH");
 		}
 
-		ClintAuthInfo auth = *reinterpret_cast<const ClintAuthInfo*>(it->second.c_str());
+		ClintAuthInfo auth = *reinterpret_cast<const ClintAuthInfo*>(it->second.data());
 		auth.attr_ = ntohs(auth.attr_);
 		auth.gid_ = ntohl(auth.gid_);
 		auth.duration_ = ntohl(auth.duration_);

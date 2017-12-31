@@ -6,24 +6,19 @@ void auth_group::join(connection_ptr participant)
 {
 	lock_guard<mutex> lock(mutex_);
 
-	LOG_DBUG("conn(%s) join", participant->to_string().c_str());
 	participants_.insert(participant);
 
-	int i = 0;
 	for(auto it = recent_auth_.begin();it!= recent_auth_.end();)
     {
 		if (time(NULL) - it->second.auth_time_ >= it->second.duration_)
 		{
 			it = recent_auth_.erase(it);
-			LOG_DBUG("timeout");
 		} 
 		else
 		{
 			participant->deliver((it++)->second);
-			i++;
 		}
      }
-	LOG_DBUG("end:%d",i);
 }
 
 void auth_group::leave(connection_ptr participant)
@@ -36,8 +31,10 @@ void auth_group::insert(const ClintAuthInfo& auth)
 {
 	lock_guard<mutex> lock(mutex_);
 
+	LOG_DBUG("sizes(%s)b", auth.mac_);
+	LOG_DBUG("size(%d)b", recent_auth_.size());
 	recent_auth_[auth.mac_] = auth;
-
+	LOG_DBUG("size(%d)e", recent_auth_.size());
 	for (auto participant : participants_)
 		participant->deliver(auth);
 }
