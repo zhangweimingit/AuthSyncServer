@@ -62,7 +62,7 @@ void server::handle_accept(const boost::system::error_code& e)
 {
 	if (!e)
 	{
-		auto conn = std::make_shared<connection>();
+		auto conn = std::make_shared<connection>(std::move(socket_),this);
 		conn->start();
 	}
 
