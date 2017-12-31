@@ -38,7 +38,6 @@ private:
 
 	sync_db& db_;
 
-	sync_auth sync_auth_;
 	// The number of threads that will call io_service::run().
 	std::size_t thread_pool_size_;
 
