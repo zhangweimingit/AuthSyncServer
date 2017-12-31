@@ -72,10 +72,10 @@ private:
 	std::array<char, 1024> recv_buffer_;
 	std::array<char, 1024> send_buffer_;
 
-	//Which group to belong to
+	//Which group its belongs to
 	auth_group *auth_group_;
 
-	//Which server to belong to
+	//Which server its belongs to
 	server *sync_server_;
 };
 

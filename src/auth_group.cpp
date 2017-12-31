@@ -19,12 +19,14 @@ void auth_group::join(connection_ptr participant)
 			participant->deliver((it++)->second);
 		}
      }
+	LOG_DBUG("conn(%s) join group", participant->to_string().c_str());
 }
 
 void auth_group::leave(connection_ptr participant)
 {
 	lock_guard<mutex> lock(mutex_);
 	participants_.erase(participant);
+	LOG_DBUG("conn(%s) leave group", participant->to_string().c_str());
 }
 
 void auth_group::insert(const ClintAuthInfo& auth)
@@ -35,6 +37,7 @@ void auth_group::insert(const ClintAuthInfo& auth)
 
 	for (auto participant : participants_)
 		participant->deliver(auth);
+	LOG_DBUG("group recv new auth");
 }
 
 void auth_group::erase(const ClintAuthInfo &auth)
