@@ -23,7 +23,7 @@ void auth_group::join(connection_ptr participant)
 			i++;
 		}
      }
-	LOG_DBUG("end");
+	LOG_DBUG("end:%d",i);
 }
 
 void auth_group::leave(connection_ptr participant)
