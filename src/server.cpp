@@ -72,6 +72,7 @@ void server::handle_accept(const boost::system::error_code& e)
 void server::handle_stop()
 {
 	io_service_.stop();
+	memory_db_.clear();
 }
 
 sync_db& server::get_db()
