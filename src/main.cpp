@@ -79,8 +79,8 @@ int main(int argc, const char **argv)
 	}
 	catch (const exception &e) 
 	{
-		LOG_ERRO("exception:%s", e.what());
-		cout << desc << endl;;
+		LOG_ERRO("program exit exception:%s", e.what());
+		cout << e.what() << endl;;
 	}
 
 	LOG_INFO("AuditSyncServer end");
