@@ -41,8 +41,6 @@ private:
 
 	sync_db& mysql_db_;
 
-	std::map<unsigned, auth_group> memory_db_;
-
 	// The number of threads that will call io_service::run().
 	std::size_t thread_pool_size_;
 
@@ -57,6 +55,8 @@ private:
 
 	// The next socket to be accepted.
 	boost::asio::ip::tcp::socket socket_;
+
+	std::map<unsigned, auth_group> memory_db_;
 
 	std::mutex mutex_;
 };
