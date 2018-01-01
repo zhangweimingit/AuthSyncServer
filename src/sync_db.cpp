@@ -29,33 +29,9 @@ void sync_db::InitConnection(int initSize)
 
 	for (int i = 0; i < initSize; i++)
 	{
-		conn = CreateConnection();
-
-		if (conn)
-		{
-			connList_.push_back(conn);
-			++(curSize_);
-		}
-		else
-		{
-			LOG_DBUG("create conn error");
-		}
-	}
-}
-
-Connection* sync_db::CreateConnection()
-{
-	Connection* conn;
-
-	try 
-	{
-		conn = driver_->connect(url_, user_, password_);  //create a conn   
-		return conn;
-	}
-	catch (std::exception& e)
-	{
-		LOG_DBUG("create conn error");
-		return nullptr;
+		conn = driver_->connect(url_, user_, password_);  //create a conn  
+		connList_.push_back(conn);
+		++(curSize_);
 	}
 }
 
@@ -72,33 +48,22 @@ Connection* sync_db::GetConnection()
 		if (conn->isClosed())//if the conn is closed, delete it and recreate it  
 		{
 			delete conn;
-			conn = CreateConnection();
+			conn = driver_->connect(url_, user_, password_);  //create a conn 
 		}
 
-		if (conn == nullptr)
-		{
-			--curSize_;
-		}
 		return conn;
 	}
 	else
 	{
 		if (curSize_ < maxSize_)//the pool no conn  
 		{
-			conn = CreateConnection();
-			if (conn)
-			{
-				++curSize_;
-				return conn;
-			}
-			else
-			{
-				return nullptr;
-			}
+			conn = driver_->connect(url_, user_, password_);  //create a conn
+			++curSize_;
+			return conn;
 		}
 		else //the conn count > maxSize  
 		{
-			return nullptr;
+			throw std::logic_error("thread count is more than connections");
 		}
 	}
 }
@@ -163,20 +128,20 @@ void sync_db::insert(const ClintAuthInfo &auth)
 	}
 	catch (std::exception& e)
 	{
-		LOG_DBUG("insert into database error");
+		LOG_DBUG("insert into database error(%s)",e.what());
 	}
 }
 
 void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 {
 	LOG_INFO("Load database begin");
-	Connection *conn;
+
 	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
 
-	conn = GetConnection();
-	if (conn)
+	try
 	{
 		unsigned count = 0;
+		Connection *conn = GetConnection();
 		conn->setSchema(sync_config->db_database_);
 		shared_ptr<Statement> stmt1(conn->createStatement());
 		shared_ptr<Statement> stmt2(conn->createStatement());
@@ -188,7 +153,7 @@ void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 			memcpy(auth.mac_, res->getString("mac").c_str(), MAC_STR_LEN);
 			auth.mac_[MAC_STR_LEN] = '\0';
 			auth.attr_ = res->getUInt("attr");
-			auth.gid_  = res->getUInt("gid");
+			auth.gid_ = res->getUInt("gid");
 			auth.auth_time_ = res->getUInt("auth_time");
 			auth.duration_ = res->getUInt("duration");
 			if (time(NULL) - auth.auth_time_ >= auth.duration_)
@@ -202,8 +167,8 @@ void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 		ReleaseConnection(conn);
 		LOG_INFO("Load %d record from database", count);
 	}
-	else
+	catch (const std::exception&e)
 	{
-		LOG_ERRO("Load database failed!!");
+		LOG_DBUG("Load database error(%s)", e.what());
 	}
 }

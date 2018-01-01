@@ -39,9 +39,6 @@ private:
 	//init DB pool  
 	void InitConnection(int initSize);
 
-	// create a connection  
-	sql::Connection* CreateConnection();
-
 	//destory connection  
 	void DestoryConnection(sql::Connection *conn);
 
