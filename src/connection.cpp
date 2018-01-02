@@ -16,7 +16,7 @@
 #include "base/utils/singleton.hpp"
 #include "base/utils/ik_logger.h"
 #include "base/algo/md5.hpp"
-#include "sync_config.hpp"
+#include "auth_config.hpp"
 #include "server.hpp"
 using namespace std;
 
@@ -112,7 +112,7 @@ void connection::do_read_body(DataOption& opts, boost::asio::yield_context& yiel
 
 void connection::do_auth_request(DataOption& opts, boost::asio::yield_context& yield)
 {
-	SyncConfig *sync_config = cppbase::Singleton<SyncConfig>::instance_ptr();
+	const auth_config& config = boost::serialization::singleton<auth_config>::get_const_instance();
 
 	auto it = opts.find(CHAP_STR);
 	if (it == opts.end())
@@ -123,7 +123,7 @@ void connection::do_auth_request(DataOption& opts, boost::asio::yield_context& y
 
 	cppbase::MD5 md5;
 	uint8_t ret[16];
-	string comp = it->second + sync_config->server_pwd_;
+	string comp = it->second + config.server_pwd_;
 	string chap_res;
 
 	md5.md5_once(const_cast<char*>(comp.data()), comp.size(), ret);
@@ -136,7 +136,7 @@ void connection::do_auth_request(DataOption& opts, boost::asio::yield_context& y
 
 void connection::do_auth_response(DataOption& opts, boost::asio::yield_context& yield)
 {
-	SyncConfig *sync_config = cppbase::Singleton<SyncConfig>::instance_ptr();
+	const auth_config& config = boost::serialization::singleton<auth_config>::get_const_instance();
 
 	if (!certified_)
 	{
@@ -147,7 +147,7 @@ void connection::do_auth_response(DataOption& opts, boost::asio::yield_context& 
 			throw std::runtime_error(to_string());
 		}
 
-		if (!validate_chap_str(it->second, chap_req_, sync_config->client_pwd_))
+		if (!validate_chap_str(it->second, chap_req_, config.client_pwd_))
 		{
 			LOG_ERRO("conn(%s) recv invaild chap_res", to_string().c_str());
 			throw std::runtime_error(to_string());

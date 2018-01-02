@@ -7,10 +7,9 @@
 
 #include <boost/program_options.hpp>
 
-#include "base/utils/singleton.hpp"
 #include "base/utils/ik_logger.h"
 
-#include "sync_config.hpp"
+#include "auth_config.hpp"
 #include "sync_db.hpp"
 #include "server.hpp"
 using namespace std;
@@ -53,14 +52,15 @@ int main(int argc, const char **argv)
 
 		LOG_INFO("AuditSyncServer start");
 		auto config_file_name = vm["config"].as<string>();
-		if (!parse_config_file(config_file_name))
+		auth_config& config = boost::serialization::singleton<auth_config>::get_mutable_instance();
+
+		if (!config.parse_config_file(config_file_name))
 		{
 			cerr << "parse_config_file failed" << endl;
 			exit(1);
 		}
 
-		SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
-		reset_log_level(sync_config->log_level_.c_str());
+		reset_log_level(config.log_level_.c_str());
 		LOG_DBUG("AuditSyncServer start 2");
 
 		if (vm.count("daemon"))
@@ -73,8 +73,8 @@ int main(int argc, const char **argv)
 			LOG_INFO("AuditSyncServer become a daemon service");
 		}
 
-		sync_db database(sync_config->db_server_, sync_config->db_user_, sync_config->db_pwd_, sync_config->thread_cnt_);
-		server auth_server(sync_config->port_, sync_config->thread_cnt_, database);
+		sync_db database(config.db_server_, config.db_user_, config.db_pwd_, config.thread_cnt_);
+		server auth_server(config.port_, config.thread_cnt_, database);
 		auth_server.run();
 	}
 	catch (const exception &e) 

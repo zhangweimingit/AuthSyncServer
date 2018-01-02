@@ -22,7 +22,7 @@ uint32_t constuct_sync_auth_req_msg(const string &chap_req, char* buffer)
 uint32_t construct_sync_auth_res_msg(const string &chap_res, char* buffer)
 {
 	DataOption opts;
-
+	
 	/* add the chap request str */
 	opts.insert(make_pair(CHAP_RES, chap_res));
 

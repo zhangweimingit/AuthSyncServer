@@ -1,61 +1,53 @@
 #include <iostream>
-
-#include "base/utils/safe_file.hpp"
-#include "base/json/json.h"
-#include "base/utils/singleton.hpp"
-#include "base/utils/ik_logger.h"
-
-#include "sync_config.hpp"
+#include <fstream>
+#include <boost/property_tree/ptree.hpp>  
+#include <boost/property_tree/json_parser.hpp>  
+#include "auth_config.hpp"
 
 using namespace std;
-using namespace cppbase;
 
-bool parse_config_file(string &config_file)
+bool auth_config::parse_config_file(string &config_file)
 {
-	SafeIFile config;
-	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
+	try
+	{
+		ifstream input(config_file);
+		if (input)
+		{
+			boost::property_tree::ptree root;
+			boost::property_tree::ptree items;
+			boost::property_tree::read_json<boost::property_tree::ptree>(input, root);
 
-	config.open(config_file, std::ifstream::in);
+			ip_ = root.get<string>("ip");
+			port_ = root.get<unsigned>("port");
+			thread_cnt_ = root.get<unsigned>("thread_cnt");
 
-	try {		
-		Json::Reader reader;
-		Json::Value root;
-		if (!reader.parse(config.get_ifstream(), root, false)) {
-			cerr << "Invalid Json format config file" << endl;
+			log_level_ = root.get<string>("log_level");
+
+			client_pwd_ = root.get<string>("client_pwd");
+			server_pwd_ = root.get<string>("server_pwd");
+
+			db_server_ = root.get<string>("db_server");
+			db_user_ = root.get<string>("db_user");
+			db_pwd_ = root.get<string>("db_pwd");
+			db_database_ = root.get<string>("db_database");
+			db_table_ = root.get<string>("db_table");
+
+			if (thread_cnt_ == 0)
+			{
+				thread_cnt_ = 1;
+			}
+		}
+		else
+		{
+			cerr << "read json file error:" << config_file << endl;
 			return false;
 		}
-
-		sync_config->ip_ = root["ip"].asString();
-		sync_config->port_ = root["port"].asUInt();
-
-		sync_config->thread_cnt_ = root["thread_cnt"].asUInt();
-		if (sync_config->thread_cnt_ == 0) {
-			sync_config->thread_cnt_ = 1;
-		}
-
-		sync_config->log_level_ = root["log_level"].asString();
-		
-		sync_config->client_pwd_ = root["client_pwd"].asString();
-		sync_config->server_pwd_ = root["server_pwd"].asString();
-
-		sync_config->db_server_ = root["db_server"].asString();
-		sync_config->db_user_ = root["db_user"].asString();
-		sync_config->db_pwd_ = root["db_pwd"].asString();
-		sync_config->db_database_ = root["db_database"].asString();
-		sync_config->db_table_ = root["db_table"].asString();
-
-		sync_config->rest_ip_ = root["rest_ip"].asString();
-		sync_config->rest_port_ = root["rest_port"].asUInt();
 	}
-	catch (exception &e) {
-		cerr << "Invalid config file" << endl;
+	catch (const std::exception&e)
+	{
+		cerr << "json file invalid:" << e.what() << endl;
 		return false;
 	}
-
-	LOG_INFO("Listen IP(%s) port(%d) work_theads(%d) client_pwd(%s) server_pwd(%s) db_server(%s) rest_ip(%s) rest_port(%d)\n", 
-		sync_config->ip_.c_str(), sync_config->port_,
-		sync_config->thread_cnt_, sync_config->client_pwd_.c_str(), sync_config->server_pwd_.c_str(),
-		sync_config->db_server_.c_str(), sync_config->rest_ip_.c_str(), sync_config->rest_port_);
 	
 	return true;
 }

@@ -4,9 +4,8 @@
 #include <exception>    
 #include <stdio.h>    
 #include "sync_db.hpp"
-#include "sync_config.hpp"
+#include "auth_config.hpp"
 #include "base/utils/ik_logger.h"
-#include "base/utils/singleton.hpp"
 
 using namespace std;  
 using namespace sql;  
@@ -114,14 +113,14 @@ sync_db::~sync_db()
 
 void sync_db::insert(const ClintAuthInfo &auth)
 {
-	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
+	const auth_config& config = boost::serialization::singleton<auth_config>::get_const_instance();
 	try
 	{
 		Connection *conn = GetConnection();
-		conn->setSchema(sync_config->db_database_);
+		conn->setSchema(config.db_database_);
 		shared_ptr<Statement> stmt(conn->createStatement());
 		std::ostringstream os;
-		os << "replace into " << sync_config->db_table_
+		os << "replace into " << config.db_table_
 			<< " (mac,attr,gid,auth_time,duration) values (" << "\'" << auth.mac_ << "\'," << auth.attr_ << ',' << auth.gid_ << "," << auth.auth_time_ << "," << auth.duration_ << ")";
 		stmt->executeUpdate(os.str());
 		ReleaseConnection(conn);
@@ -136,16 +135,16 @@ void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 {
 	LOG_INFO("Load database begin");
 
-	SyncConfig *sync_config = Singleton<SyncConfig>::instance_ptr();
+	const auth_config& config = boost::serialization::singleton<auth_config>::get_const_instance();
 
 	try
 	{
 		unsigned count = 0;
 		Connection *conn = GetConnection();
-		conn->setSchema(sync_config->db_database_);
+		conn->setSchema(config.db_database_);
 		shared_ptr<Statement> stmt1(conn->createStatement());
 		shared_ptr<Statement> stmt2(conn->createStatement());
-		shared_ptr<ResultSet> res(stmt1->executeQuery("select * from  " + sync_config->db_table_));
+		shared_ptr<ResultSet> res(stmt1->executeQuery("select * from  " + config.db_table_));
 
 		while (res->next())
 		{
@@ -158,7 +157,7 @@ void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 			auth.duration_ = res->getUInt("duration");
 			if (time(NULL) - auth.auth_time_ >= auth.duration_)
 			{
-				stmt2->executeUpdate("delete from " + sync_config->db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(auth.gid_));
+				stmt2->executeUpdate("delete from " + config.db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(auth.gid_));
 				continue;
 			}
 			memory_db[auth.gid_].insert(auth);

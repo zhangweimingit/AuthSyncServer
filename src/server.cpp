@@ -11,8 +11,7 @@
 #include <thread>
 #include "server.hpp"
 #include "base/utils/ik_logger.h"
-#include "base/utils/singleton.hpp"
-#include "sync_config.hpp"
+
 
 using namespace std;
 using namespace cppbase;

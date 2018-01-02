@@ -1,10 +1,13 @@
-#ifndef SYNC_CONFIG_HPP_
-#define SYNC_CONFIG_HPP_
+#ifndef AUTH_CONFIG_HPP_
+#define AUTH_CONFIG_HPP_
 
 #include <string>
+#include <boost/serialization/singleton.hpp>
 
+struct auth_config 
+{
+	bool parse_config_file(std::string &config_file);
 
-struct SyncConfig {
 	std::string ip_;
 	uint16_t port_;
 
@@ -23,7 +26,4 @@ struct SyncConfig {
 	std::string rest_ip_;
 	uint16_t rest_port_;
 };
-
-extern bool parse_config_file(std::string &config_file);
-
 #endif
