@@ -54,9 +54,6 @@ void connection::do_process(boost::asio::yield_context yield)
 			case AUTH_RESPONSE:
 				do_auth_response(opts, yield);
 				break;
-			case CLI_AUTH_REQ:
-				do_cli_auth_request(opts, yield);
-				break;
 			case CLI_AUTH_RES:
 				do_cli_auth_response(opts, yield);
 				break;
@@ -170,37 +167,6 @@ void connection::do_auth_response(DataOption& opts, boost::asio::yield_context& 
 	else
 	{
 		LOG_ERRO("already certified");
-	}
-}
-
-void connection::do_cli_auth_request(DataOption& opts, boost::asio::yield_context& yield)
-{
-	LOG_DBUG("recv client_auth_req msg");
-	if (certified_)
-	{
-		auto it = opts.find(CLIENT_MAC);
-		if (it == opts.end())
-		{
-			LOG_ERRO("conn(%s) recv invaild  cli auth request", to_string().c_str());
-			throw std::runtime_error(to_string());
-		}
-
-		ClintAuthInfo auth = *reinterpret_cast<const ClintAuthInfo*>(it->second.data());
-
-		if (auth_group_->authed(auth))
-		{
-			size_t data_len = construct_sync_cli_auth_res_msg(auth, send_buffer_.data());
-			boost::asio::async_write(socket_, boost::asio::buffer(send_buffer_, data_len), yield);
-			LOG_DBUG("conn(%s) the req mac(%s) is authed by attr(%d)", to_string().c_str(), auth.mac_, auth.attr_);
-		}
-		else
-		{
-			LOG_DBUG("conn(%s) mac(%s) fail to find auth info", to_string().c_str(), auth.mac_);
-		}
-	}
-	else
-	{
-		LOG_DBUG("Conn(%s) isn't authed, just ignore it",to_string().c_str());
 	}
 }
 

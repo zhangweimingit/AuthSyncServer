@@ -50,8 +50,6 @@ private:
 
 	void do_auth_response(DataOption& opts, boost::asio::yield_context& yield);
 
-	void do_cli_auth_request(DataOption& opts, boost::asio::yield_context& yield);
-
 	void do_cli_auth_response(DataOption& opts, boost::asio::yield_context& yield);
 
 	SyncMsgHeader header_;
