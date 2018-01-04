@@ -43,7 +43,22 @@ void server::run()
 	vector<shared_ptr<thread> > threads;
 	for (size_t i = 0; i < thread_pool_size_; ++i)
 	{
-		shared_ptr<thread> thread(new std::thread([this]() { io_service_.run(); }));
+		shared_ptr<thread> thread(new std::thread([this]() 
+		{ 
+			while (true)
+			{
+				try
+				{
+					io_service_.run();
+					break;
+				}
+				catch (std::exception&e)
+				{
+					LOG_DBUG("io_service_.run() exception:%s", e.what());
+				}
+			}
+			
+			 }));
 		threads.push_back(thread);
 	}
 
