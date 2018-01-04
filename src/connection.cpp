@@ -64,7 +64,6 @@ void connection::do_process(boost::asio::yield_context yield)
 	}
 	catch (std::exception& e)
 	{
-		LOG_ERRO("Conn(%s) exception:%s ",to_string().c_str(),e.what());
 		auth_group_->leave(shared_from_this());
 		socket_.close();
 	}
