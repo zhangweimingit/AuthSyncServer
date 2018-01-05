@@ -6,7 +6,7 @@
 
 using namespace std;
 
-bool auth_config::parse_config_file(string &config_file)
+bool auth_config::parse(string &config_file)
 {
 	try
 	{

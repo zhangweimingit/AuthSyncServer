@@ -31,7 +31,7 @@ public:
 
 	void load_auth_info(std::map<unsigned, auth_group>& memory_db);
 
-	void insert(const ClintAuthInfo &auth);
+	void insert(const auth_info &auth);
 
 	~sync_db();
 

@@ -111,7 +111,7 @@ sync_db::~sync_db()
 	DestoryConnPool();
 }
 
-void sync_db::insert(const ClintAuthInfo &auth)
+void sync_db::insert(const auth_info &auth)
 {
 	const auth_config& config = boost::serialization::singleton<auth_config>::get_const_instance();
 	try

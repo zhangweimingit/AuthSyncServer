@@ -15,6 +15,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
+#include "auth_message.hpp"
 #include "sync_msg.hpp"
 
 class server;
@@ -32,7 +33,8 @@ public:
 	void start();
 
 	//Authentication information sent by the same group of other connections
-	void deliver(const ClintAuthInfo& auth);
+	void deliver(const auth_info& auth);
+	void do_send_auth_msg(const auth_info& auth);
 
 	std::string to_string();
 
@@ -40,17 +42,9 @@ private:
 
 	void do_process(boost::asio::yield_context yield);
 
-	void do_check_client(boost::asio::yield_context& yield);
+	void do_auth_response(boost::asio::yield_context& yield);
 
-	void do_read_header(boost::asio::yield_context& yield);
-
-	void do_read_body(DataOption& opts, boost::asio::yield_context& yield);
-
-	void do_auth_request(DataOption& opts, boost::asio::yield_context& yield);
-
-	void do_auth_response(DataOption& opts, boost::asio::yield_context& yield);
-
-	void do_cli_auth_response(DataOption& opts, boost::asio::yield_context& yield);
+	void do_cli_auth_response(boost::asio::yield_context& yield);
 
 	SyncMsgHeader header_;
 
@@ -66,10 +60,7 @@ private:
 	// Strand to ensure the connection's handlers are not called concurrently.
 	boost::asio::io_service::strand strand_;
 
-	// Buffer for incoming data.
-	std::array<char, 1024> recv_buffer_;
-	std::array<char, 1024> send_buffer_;
-
+	auth_message auth_message_;
 	//Which group its belongs to
 	auth_group *auth_group_;
 

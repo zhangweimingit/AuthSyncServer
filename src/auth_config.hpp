@@ -6,7 +6,7 @@
 
 struct auth_config 
 {
-	bool parse_config_file(std::string &config_file);
+	bool parse(std::string &config_file);
 
 	std::string ip_;
 	uint16_t port_;

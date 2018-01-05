@@ -29,7 +29,7 @@ void auth_group::leave(connection_ptr participant)
 	LOG_DBUG("conn(%s) leave group", participant->to_string().c_str());
 }
 
-void auth_group::insert(const ClintAuthInfo& auth)
+void auth_group::insert(const auth_info& auth)
 {
 	lock_guard<mutex> lock(mutex_);
 
@@ -40,7 +40,7 @@ void auth_group::insert(const ClintAuthInfo& auth)
 	LOG_DBUG("group recv new auth");
 }
 
-void auth_group::erase(const ClintAuthInfo &auth)
+void auth_group::erase(const auth_info &auth)
 {
 	lock_guard<mutex> lock(mutex_);
 
@@ -50,7 +50,7 @@ void auth_group::erase(const ClintAuthInfo &auth)
 	}
 }
 
-bool auth_group::authed(ClintAuthInfo &auth)
+bool auth_group::authed(auth_info &auth)
 {
 	lock_guard<mutex> lock(mutex_);
 

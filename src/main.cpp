@@ -54,7 +54,7 @@ int main(int argc, const char **argv)
 		auto config_file_name = vm["config"].as<string>();
 		auth_config& config = boost::serialization::singleton<auth_config>::get_mutable_instance();
 
-		if (!config.parse_config_file(config_file_name))
+		if (!config.parse(config_file_name))
 		{
 			cerr << "parse_config_file failed" << endl;
 			exit(1);
