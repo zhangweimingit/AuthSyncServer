@@ -12,22 +12,18 @@
 #define AUTH_MESSAGEH_HPP
 
 #include <string>
-#include <algorithm>
-#include <random>
 #include <vector>
-#include <sstream>
 #include <boost/asio.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+
 enum Msg_Type
 {
 	MSG_INVALID_TYPE,
 
-	AUTH_REQUEST,
-	AUTH_RESPONSE,
+	CHECK_CLIENT,
+	CHECK_CLIENT_RESPONSE,
 
-	CLI_AUTH_REQ,	// Request client auth 
-	CLI_AUTH_RES,	// client auth result
+	AUTH_REQUEST,	// Request client auth 
+	AUTH_RESPONSE,	// client auth result
 
 	MSG_TYPE_NR
 };
@@ -62,31 +58,29 @@ struct chap
 class auth_message
 {
 public:
+	
+	void set_header(Msg_Type msg);//The head must be set before sending
+	void parse_header();//Parsing the header information received from the client
+	
+	void constuct_check_client_msg();//Verify the validity of the client
+	void parse_check_client_res_msg();//Verify the validity of the client
 
-	void validate_header();
-	void set_header(Msg_Type);
-	void constuct_check_client_msg();
-	void resolve_check_client_msg();
-
-	void constuct_auth_msg(const auth_info& auth);
-	void resolve_auth_msg(auth_info& auth);
+	void constuct_auth_res_msg(const auth_info& auth);//Sending the authentication information to the client
+	void parse_auth_res_msg(auth_info& auth); //Parsing authentication information received from the client
 
 private:
 	friend class connection;
 
 	std::string random_string(size_t length);
 
-	//Authentication string
-	chap chap_;
-
 	union 
 	{
 		header header_;
 		std::array<char, sizeof(header)> header_buffer_;
 	};
-
+	chap server_chap_;
 	std::string send_body_;
 	std::vector<char> recv_body_;
-	std::vector<boost::asio::const_buffer> send_buffer_;
+	std::vector<boost::asio::const_buffer> send_buffers_;
 };
 #endif // AUTH_MESSAGEH_HPP

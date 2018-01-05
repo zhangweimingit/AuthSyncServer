@@ -16,9 +16,9 @@
 #include "base/utils/ik_logger.h"
 #include "auth_config.hpp"
 #include "server.hpp"
+
 using namespace std;
 
-using boost::asio::detail::socket_ops::network_to_host_short;
 
 connection::connection(boost::asio::ip::tcp::socket socket, server* server)
 	: socket_(std::move(socket)),
@@ -39,20 +39,20 @@ void connection::do_process(boost::asio::yield_context yield)
 	try
 	{
 		auth_message_.constuct_check_client_msg();
-		boost::asio::async_write(socket_, auth_message_.send_buffer_, yield);
+		boost::asio::async_write(socket_, auth_message_.send_buffers_, yield);
 
 		for (;;)
 		{
 			boost::asio::async_read(socket_, boost::asio::buffer(auth_message_.header_buffer_), yield);
-			auth_message_.validate_header();
+			auth_message_.parse_header();
 			boost::asio::async_read(socket_, boost::asio::buffer(auth_message_.recv_body_), yield);
 
 			switch (auth_message_.header_.type_)
 			{
-			case AUTH_RESPONSE:
+			case CHECK_CLIENT_RESPONSE:
 				do_auth_response(yield);
 				break;
-			case CLI_AUTH_RES:
+			case AUTH_RESPONSE:
 				do_cli_auth_response(yield);
 				break;
 			default:
@@ -71,8 +71,8 @@ void connection::do_auth_response( boost::asio::yield_context& yield)
 {
 	if (!certified_)
 	{
-		auth_message_.resolve_check_client_msg();
-		auth_group_ = &(sync_server_->group(auth_message_.chap_.gid_));
+		auth_message_.parse_check_client_res_msg();
+		auth_group_ = &(sync_server_->group(auth_message_.server_chap_.gid_));
 		auth_group_->join(shared_from_this());
 		certified_ = true;
 		LOG_DBUG("certified client");
@@ -89,10 +89,10 @@ void connection::do_cli_auth_response(boost::asio::yield_context& yield)
 	if (certified_)
 	{
 		auth_info auth;
-		auth_message_.resolve_auth_msg(auth);
+		auth_message_.parse_auth_res_msg(auth);
 		auth.auth_time_ = time(0);
 		auth_group_->insert(auth);
-		sync_server_->get_db().insert(auth_message_.chap_.gid_,auth);
+		sync_server_->get_db().insert(auth_message_.server_chap_.gid_, auth);
 	}
 	else
 	{
@@ -107,8 +107,8 @@ void connection::deliver(const auth_info& auth)
 
 void connection::do_send_auth_msg(const auth_info& auth)
 {
-	auth_message_.constuct_auth_msg(auth);
-	boost::asio::async_write(socket_, auth_message_.send_buffer_,[](const boost::system::error_code&ec, size_t) {});
+	auth_message_.constuct_auth_res_msg(auth);
+	boost::asio::async_write(socket_, auth_message_.send_buffers_,[](const boost::system::error_code&ec, size_t) {});
 }
 
 std::string connection::to_string()
