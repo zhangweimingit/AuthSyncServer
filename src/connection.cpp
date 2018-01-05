@@ -102,7 +102,7 @@ void connection::do_cli_auth_response(boost::asio::yield_context& yield)
 
 void connection::deliver(const auth_info& auth)
 {
-	strand_.dispatch(std::bind(&connection::do_send_auth_msg, shared_from_this()));
+	strand_.dispatch(std::bind(&connection::do_send_auth_msg, shared_from_this(), auth));
 }
 
 void connection::do_send_auth_msg(const auth_info& auth)
