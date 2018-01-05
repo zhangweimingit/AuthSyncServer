@@ -46,8 +46,6 @@ private:
 
 	void do_cli_auth_response(boost::asio::yield_context& yield);
 
-	SyncMsgHeader header_;
-
 	//Whether the client has passed the authentication
 	bool certified_ = false;
 

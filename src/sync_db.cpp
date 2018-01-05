@@ -111,7 +111,7 @@ sync_db::~sync_db()
 	DestoryConnPool();
 }
 
-void sync_db::insert(const auth_info &auth)
+void sync_db::insert(unsigned gid, const auth_info &auth)
 {
 	const auth_config& config = boost::serialization::singleton<auth_config>::get_const_instance();
 	try
@@ -121,7 +121,7 @@ void sync_db::insert(const auth_info &auth)
 		shared_ptr<Statement> stmt(conn->createStatement());
 		std::ostringstream os;
 		os << "replace into " << config.db_table_
-			<< " (mac,attr,gid,auth_time,duration) values (" << "\'" << auth.mac_ << "\'," << auth.attr_ << ',' << auth.gid_ << "," << auth.auth_time_ << "," << auth.duration_ << ")";
+			<< " (mac,attr,gid,auth_time,duration) values (" << "\'" << auth.mac_ << "\'," << auth.attr_ << ',' << gid << "," << auth.auth_time_ << "," << auth.duration_ << ")";
 		stmt->executeUpdate(os.str());
 		ReleaseConnection(conn);
 	}

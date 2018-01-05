@@ -92,7 +92,7 @@ void connection::do_cli_auth_response(boost::asio::yield_context& yield)
 		auth_message_.resolve_auth_msg(auth);
 		auth.auth_time_ = time(0);
 		auth_group_->insert(auth);
-		sync_server_->get_db().insert(auth);
+		sync_server_->get_db().insert(auth_message_.chap_.gid_,auth);
 	}
 	else
 	{
