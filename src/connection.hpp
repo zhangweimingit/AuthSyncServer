@@ -16,7 +16,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
 #include "auth_message.hpp"
-#include "sync_msg.hpp"
+
 
 class server;
 class auth_group;
