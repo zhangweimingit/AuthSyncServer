@@ -37,7 +37,7 @@ void auth_group::insert(const auth_info& auth)
 
 	for (auto participant : participants_)
 		participant->deliver(auth);
-	LOG_DBUG("group recv new auth");
+	LOG_DBUG("group recv new auth:mac(%s) attr(%u) duration(%u)", auth.mac_.c_str(), auth.attr_,auth.duration_);
 }
 
 void auth_group::erase(const auth_info &auth)

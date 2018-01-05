@@ -18,56 +18,69 @@
 #include "server.hpp"
 
 using namespace std;
+using boost::asio::ip::tcp;
+using boost::asio::async_write;
+using boost::asio::async_read;
+using boost::asio::spawn;
+using std::placeholders::_1;
 
 
-connection::connection(boost::asio::ip::tcp::socket socket, server* server)
+
+//Constructor
+connection::connection(tcp::socket socket, server* server)
 	: socket_(std::move(socket)),
 	strand_(socket_.get_io_service()),
 	sync_server_(server)
 {
 }
 
+//The new session begins to execute
 void connection::start()
 {
-	LOG_DBUG("conn(%s) start working",to_string().c_str());
-	boost::asio::spawn(strand_,
-		std::bind(&connection::do_process,shared_from_this(), placeholders::_1));
+	LOG_DBUG("conn(%s) start working", to_string().c_str());
+	spawn(strand_,std::bind(&connection::do_process, shared_from_this(), _1));
 }
 
+//service processing entry
 void connection::do_process(boost::asio::yield_context yield)
 {
 	try
 	{
+		// First to check whether the client is valid
 		auth_message_.constuct_check_client_msg();
-		boost::asio::async_write(socket_, auth_message_.send_buffers_, yield);
+		async_write(socket_, auth_message_.send_buffers_, yield);
 
 		for (;;)
 		{
-			boost::asio::async_read(socket_, boost::asio::buffer(auth_message_.header_buffer_), yield);
+			//read header
+			async_read(socket_, boost::asio::buffer(auth_message_.header_buffer_), yield);
 			auth_message_.parse_header();
-			boost::asio::async_read(socket_, boost::asio::buffer(auth_message_.recv_body_), yield);
+
+			//read body
+			async_read(socket_, boost::asio::buffer(auth_message_.recv_body_), yield);
 
 			switch (auth_message_.header_.type_)
 			{
 			case CHECK_CLIENT_RESPONSE:
-				do_auth_response(yield);
+				do_check_client_response(yield);
 				break;
 			case AUTH_RESPONSE:
-				do_cli_auth_response(yield);
+				do_auth_response(yield);
 				break;
 			default:
-				LOG_ERRO("Conn(%s) send on invalid mst type",to_string().c_str());
+				LOG_ERRO("Conn(%s) send on invalid mst type", to_string().c_str());
 			}
 		}
 	}
 	catch (std::exception& e)
 	{
+		LOG_ERRO("socket closed because of %s", e.what());
 		auth_group_->leave(shared_from_this());
 	}
 
 }
-
-void connection::do_auth_response( boost::asio::yield_context& yield)
+//Client reply check message
+void connection::do_check_client_response( boost::asio::yield_context& yield)
 {
 	if (!certified_)
 	{
@@ -75,22 +88,21 @@ void connection::do_auth_response( boost::asio::yield_context& yield)
 		auth_group_ = &(sync_server_->group(auth_message_.server_chap_.gid_));
 		auth_group_->join(shared_from_this());
 		certified_ = true;
-		LOG_DBUG("certified client");
+		LOG_DBUG("Conn(%s) is certified  gid(%u)", to_string().c_str(), auth_message_.server_chap_.gid_);
 	}
 	else
 	{
-		LOG_ERRO("already certified");
+		LOG_ERRO("Conn(%s) is already certified", to_string().c_str());
 	}
 }
 
-void connection::do_cli_auth_response(boost::asio::yield_context& yield)
+//Receive authentication information from the client
+void connection::do_auth_response(boost::asio::yield_context& yield)
 {
-
 	if (certified_)
 	{
 		auth_info auth;
 		auth_message_.parse_auth_res_msg(auth);
-		auth.auth_time_ = time(0);
 		auth_group_->insert(auth);
 		sync_server_->get_db().insert(auth_message_.server_chap_.gid_, auth);
 	}
@@ -100,6 +112,7 @@ void connection::do_cli_auth_response(boost::asio::yield_context& yield)
 	}
 }
 
+//Authentication information delivered by other clients of the same group
 void connection::deliver(const auth_info& auth)
 {
 	strand_.dispatch(std::bind(&connection::do_send_auth_msg, shared_from_this(), auth));

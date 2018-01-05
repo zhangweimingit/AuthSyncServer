@@ -42,9 +42,9 @@ private:
 
 	void do_process(boost::asio::yield_context yield);
 
-	void do_auth_response(boost::asio::yield_context& yield);
+	void do_check_client_response(boost::asio::yield_context& yield);
 
-	void do_cli_auth_response(boost::asio::yield_context& yield);
+	void do_auth_response(boost::asio::yield_context& yield);
 
 	//Whether the client has passed the authentication
 	bool certified_ = false;
