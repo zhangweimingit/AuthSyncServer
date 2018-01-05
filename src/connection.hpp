@@ -51,7 +51,7 @@ private:
 
 	//Authentication string
 	std::string chap_req_;
-
+	std::string connection_str_;
 	// Socket for the connection.
 	boost::asio::ip::tcp::socket socket_;
 

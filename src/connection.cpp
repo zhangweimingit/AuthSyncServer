@@ -37,7 +37,6 @@ connection::connection(tcp::socket socket, server* server)
 //The new session begins to execute
 void connection::start()
 {
-	LOG_DBUG("conn(%s) start working", to_string().c_str());
 	spawn(strand_,std::bind(&connection::do_process, shared_from_this(), _1));
 }
 
@@ -46,6 +45,10 @@ void connection::do_process(boost::asio::yield_context yield)
 {
 	try
 	{
+		//connection_str_ for debug
+		connection_str_ = socket_.remote_endpoint().address().to_string()
+			+ ":" + std::to_string(socket_.remote_endpoint().port());
+
 		// First to check whether the client is valid
 		auth_message_.constuct_check_client_msg();
 		async_write(socket_, auth_message_.send_buffers_, yield);
@@ -126,6 +129,5 @@ void connection::do_send_auth_msg(const auth_info& auth)
 
 std::string connection::to_string()
 {
-	return socket_.remote_endpoint().address().to_string() + ":"
-		+ std::to_string(socket_.remote_endpoint().port());
+	return connection_str_;
 }
