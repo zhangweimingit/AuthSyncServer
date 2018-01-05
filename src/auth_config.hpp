@@ -8,13 +8,10 @@ struct auth_config
 {
 	bool parse(std::string &config_file);
 
-	std::string ip_;
 	uint16_t port_;
-
 	uint16_t thread_cnt_;
-	std::string log_level_;
 
-	std::string client_pwd_;
+	std::string log_level_;
 	std::string server_pwd_;
 
 	std::string db_server_;
@@ -22,8 +19,5 @@ struct auth_config
 	std::string db_pwd_;
 	std::string db_database_;
 	std::string db_table_;
-
-	std::string rest_ip_;
-	uint16_t rest_port_;
 };
 #endif

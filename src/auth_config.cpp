@@ -14,16 +14,13 @@ bool auth_config::parse(string &config_file)
 		if (input)
 		{
 			boost::property_tree::ptree root;
-			boost::property_tree::ptree items;
 			boost::property_tree::read_json<boost::property_tree::ptree>(input, root);
 
-			ip_ = root.get<string>("ip");
-			port_ = root.get<unsigned>("port");
-			thread_cnt_ = root.get<unsigned>("thread_cnt");
+			port_ = root.get<uint16_t>("port");
+			thread_cnt_ = root.get<uint16_t>("thread_cnt");
 
 			log_level_ = root.get<string>("log_level");
 
-			client_pwd_ = root.get<string>("client_pwd");
 			server_pwd_ = root.get<string>("server_pwd");
 
 			db_server_ = root.get<string>("db_server");
