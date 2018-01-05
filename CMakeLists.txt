@@ -14,7 +14,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-find_package(Boost REQUIRED COMPONENTS program_options system coroutine)
+find_package(Boost REQUIRED COMPONENTS program_options system coroutine context)
 find_library(SSL_LIB libssl.a REQUIRED)
 find_library(CRYPTO_LIB libcrypto.a REQUIRED)
 find_library(MYSQL_CONN_LIB libmysqlcppconn.so REQUIRED)
