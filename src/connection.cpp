@@ -47,7 +47,7 @@ void connection::do_process(boost::asio::yield_context yield)
 			auth_message_.validate_header();
 			boost::asio::async_read(socket_, boost::asio::buffer(auth_message_.recv_body_), yield);
 
-			switch (header_.type_)
+			switch (auth_message_.header_.type_)
 			{
 			case AUTH_RESPONSE:
 				do_auth_response(yield);
