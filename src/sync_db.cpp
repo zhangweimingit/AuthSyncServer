@@ -148,19 +148,17 @@ void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 
 		while (res->next())
 		{
-			ClintAuthInfo auth;
-			memcpy(auth.mac_, res->getString("mac").c_str(), MAC_STR_LEN);
-			auth.mac_[MAC_STR_LEN] = '\0';
+			auth_info auth;
+			auth.mac_= res->getString("mac");
 			auth.attr_ = res->getUInt("attr");
-			auth.gid_ = res->getUInt("gid");
 			auth.auth_time_ = res->getUInt("auth_time");
 			auth.duration_ = res->getUInt("duration");
 			if (time(NULL) - auth.auth_time_ >= auth.duration_)
 			{
-				stmt2->executeUpdate("delete from " + config.db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(auth.gid_));
+				stmt2->executeUpdate("delete from " + config.db_table_ + " where mac = \'" + auth.mac_ + "\' and gid = " + std::to_string(res->getUInt("gid")));
 				continue;
 			}
-			memory_db[auth.gid_].insert(auth);
+			memory_db[res->getUInt("gid")].insert(auth);
 			count++;
 		}
 		ReleaseConnection(conn);
