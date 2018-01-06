@@ -78,7 +78,8 @@ void connection::do_process(boost::asio::yield_context yield)
 	catch (std::exception& e)
 	{
 		LOG_ERRO("socket closed because of %s", e.what());
-		auth_group_->leave(shared_from_this());
+		if(certified_)
+			auth_group_->leave(shared_from_this());
 	}
 
 }
