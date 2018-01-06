@@ -77,9 +77,10 @@ void auth_message::parse_check_client_res_msg()
 	read_json(str_stream, root);
 	
 	chap client_chap;
-	client_chap.chap_str_ = root.get<string>("chap_str_");
+
 	client_chap.gid_ = root.get<uint32_t>("gid_");
 	client_chap.res1_ = root.get<uint32_t>("res1_");
+	client_chap.chap_str_ = root.get<string>("chap_str_");
 
 	string comp = server_chap_.chap_str_ + config.server_pwd_;
 
