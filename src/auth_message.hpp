@@ -76,7 +76,7 @@ private:
 	union 
 	{
 		header header_;
-		std::array<char, sizeof(header)> header_buffer_;
+		char header_buffer_[sizeof(header)];
 	};
 	chap server_chap_;
 	std::string send_body_;
