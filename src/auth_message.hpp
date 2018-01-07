@@ -61,9 +61,9 @@ struct auth_info
 //Challenge Handshake Authentication Protocol
 struct chap
 {
-	uint32_t gid_;
+	uint32_t gid_; //Clients report their own group ID
 	uint32_t res1_;// reserve
-	std::string chap_str_;
+	std::string chap_str_;//Encrypting data by MD5 algorithm
 
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int version)
