@@ -137,9 +137,9 @@ void auth_message::parse_auth_res_msg(auth_info& auth)
 
 }
 
-std::string auth_message::random_string(size_t length)
+string auth_message::random_string(size_t length)
 {
-	static std::default_random_engine e;
+	static default_random_engine e;
 	auto randchar = []() -> char
 	{
 		const char charset[] =
@@ -149,31 +149,28 @@ std::string auth_message::random_string(size_t length)
 		const size_t max_index = (sizeof(charset) - 1);
 		return charset[e() % max_index];
 	};
-	std::string str(length, 0);
-	std::generate_n(str.begin(), length, randchar);
+	string str(length, 0);
+	generate_n(str.begin(), length, randchar);
 	return str;
 }
 
-std::string auth_message::string_to_base16(const std::string& str)
+string auth_message::string_to_base16(const string& str)
 {
-	std::string buffer(str.size() * 2, 0);
+	string buffer(str.size() * 2, 0);
 	buffer.reserve(str.size() * 2 + 1);
 
 	for (uint32_t i = 0; i < str.size(); i++)
 	{
-		snprintf(&buffer[i * 2], 3, "%02x", (uint8_t)str[i]);
+		snprintf(&buffer[i * 2], 3, "%02x", static_cast<uint8_t>(str[i]));
 	}
 	return buffer;
 }
 
-std::string auth_message::base16_to_string(const std::string& str)
+string auth_message::base16_to_string(const string& str)
 {
-	if (str.size() % 2 != 0)
-		return str;
-
 	uint32_t v;
-	std::string buffer;
-	for (uint32_t i = 0; i < str.size() / 2; i++) 
+	string buffer;
+	for (uint32_t i = 0; i < str.size() / 2; i++)
 	{
 		sscanf(&str[0] + 2 * i, "%2x", &v);
 		buffer.push_back(static_cast<char>(v));
