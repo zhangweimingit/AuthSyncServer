@@ -81,15 +81,14 @@ void auth_message::parse_check_client_res_msg()
 	client_chap.res1_ = root.get<uint32_t>("res1_");
 	client_chap.chap_str_ = base16_to_string(root.get<string>("chap_str_"));
 
-	string comp = server_chap_.chap_str_ + config.server_pwd_;
-
-	cppbase::MD5 md5;
-	uint8_t ret[16];
-
 	if (client_chap.chap_str_.size() != 16)
 	{
 		throw runtime_error("chap length error");
 	}
+
+	uint8_t ret[16];
+	cppbase::MD5 md5;
+	string comp = server_chap_.chap_str_ + config.server_pwd_;
 
 	md5.md5_once(const_cast<char*>(comp.data()), comp.size(), ret);
 
@@ -157,13 +156,14 @@ std::string auth_message::random_string(size_t length)
 
 std::string auth_message::string_to_base16(const std::string& str)
 {
-	std::stringstream stream;
-	stream << std::hex << std::setfill('0');
+	std::string buffer(str.size() * 2 + 1, 0);
 
-	for (auto& c : str)
-		stream << std::setw(2) << (int)c;
-
-	return stream.str();
+	for (uint32_t i = 0; i < str.size(); i++)
+	{
+		snprintf(&buffer[i * 2], 3, "%02x", str[i]);
+	}
+	buffer.pop_back();
+	return buffer;
 }
 
 std::string auth_message::base16_to_string(const std::string& str)
