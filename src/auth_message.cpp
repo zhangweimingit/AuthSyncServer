@@ -155,7 +155,7 @@ std::string auth_message::random_string(size_t length)
 	return str;
 }
 
-std::string auth_message::string_to_base16(std::string& str)
+std::string auth_message::string_to_base16(const std::string& str)
 {
 	std::stringstream stream;
 	stream << std::hex << std::setfill('0');
@@ -166,7 +166,7 @@ std::string auth_message::string_to_base16(std::string& str)
 	return stream.str();
 }
 
-std::string auth_message::base16_to_string(std::string& str)
+std::string auth_message::base16_to_string(const std::string& str)
 {
 
 	if (str.size() % 2 != 0)

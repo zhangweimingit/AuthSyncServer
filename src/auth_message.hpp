@@ -72,8 +72,8 @@ private:
 	friend class connection;
 
 	std::string random_string(size_t length);
-	std::string string_to_base16(std::string& str);
-	std::string base16_to_string(std::string& str);
+	std::string string_to_base16(const std::string& str);
+	std::string base16_to_string(const std::string& str);
 
 	union 
 	{
