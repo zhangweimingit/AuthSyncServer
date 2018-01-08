@@ -168,10 +168,8 @@ std::string auth_message::string_to_base16(const std::string& str)
 
 std::string auth_message::base16_to_string(const std::string& str)
 {
-
 	if (str.size() % 2 != 0)
 		return str;
-
 
 	uint32_t v;
 	std::string buffer;
