@@ -160,7 +160,7 @@ std::string auth_message::string_to_base16(const std::string& str)
 
 	for (uint32_t i = 0; i < str.size(); i++)
 	{
-		snprintf(&buffer[i * 2], 3, "%02x", (uint32_t)str[i]);
+		snprintf(&buffer[i * 2], 3, "%02x", (uint8_t)str[i]);
 	}
 	buffer.pop_back();
 	return buffer;
