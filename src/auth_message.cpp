@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <random>
 #include <sstream>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include "base/algo/md5.hpp"
 
 using namespace std;
@@ -50,7 +50,7 @@ void auth_message::constuct_check_client_msg()
 	server_chap_.chap_str_ = random_string(32);
 	
 	std::ostringstream os;
-	boost::archive::binary_oarchive oa(os);
+	boost::archive::text_oarchive oa(os);
 	oa << server_chap_;
 	send_body_ = os.str();
 
@@ -67,7 +67,7 @@ void auth_message::parse_check_client_res_msg()
 
 	chap client_chap;
 	std::istringstream is(string(recv_body_.begin(), recv_body_.end()));
-	boost::archive::binary_iarchive ia(is);
+	boost::archive::text_iarchive ia(is);
 	ia >> client_chap;
 
 	string comp = server_chap_.chap_str_ + config.server_pwd_;
@@ -97,7 +97,7 @@ void auth_message::constuct_auth_res_msg(const auth_info& auth)
 	auth_copy.duration_ = auth_copy.duration_ - (time(0) - auth_copy.auth_time_);
 
 	std::ostringstream os;
-	boost::archive::binary_oarchive oa(os);
+	boost::archive::text_oarchive oa(os);
 	oa << auth_copy;
 	send_body_ = os.str();
 
@@ -111,7 +111,7 @@ void auth_message::constuct_auth_res_msg(const auth_info& auth)
 void auth_message::parse_auth_res_msg(auth_info& auth)
 {
 	std::istringstream is(string(recv_body_.begin(), recv_body_.end()));
-	boost::archive::binary_iarchive ia(is);
+	boost::archive::text_iarchive ia(is);
 	ia >> auth;
 	auth.auth_time_ = time(0);
 }
