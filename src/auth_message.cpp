@@ -50,13 +50,13 @@ void auth_message::constuct_check_client_msg()
 {
 	server_chap_.gid_  = 0;
 	server_chap_.res1_ = 0;
-	server_chap_.chap_str_ = string_to_base16(random_string(32));
+	server_chap_.chap_str_ = random_string(32); 
 	
 	ptree root;
 	stringstream output;
 	root.put("gid_", server_chap_.gid_);
 	root.put("res1_", server_chap_.res1_);
-	root.put("chap_str_", server_chap_.chap_str_);
+	root.put("chap_str_", string_to_base16(server_chap_.chap_str_));
 	write_json(output, root);
 
 	send_body_ = output.str();
