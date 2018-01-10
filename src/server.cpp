@@ -10,11 +10,10 @@
 #include <signal.h>
 #include <thread>
 #include "server.hpp"
-#include "base/utils/ik_logger.h"
+#include <boost/log/trivial.hpp>
 
 
 using namespace std;
-using namespace cppbase;
 using boost::asio::ip::tcp;
 
 server::server(const size_t port, size_t thread_pool_size,sync_db& db)
@@ -54,7 +53,7 @@ void server::run()
 				}
 				catch (std::exception&e)
 				{
-					LOG_DBUG("io_service_.run() exception:%s", e.what());
+					BOOST_LOG_TRIVIAL(error) << "io_service_.run() exception:" << e.what();
 				}
 			}
 			
@@ -87,6 +86,7 @@ void server::handle_stop()
 {
 	io_service_.stop();
 	memory_db_.clear();
+	BOOST_LOG_TRIVIAL(info) << "recv stop signal";
 }
 
 sync_db& server::get_db()

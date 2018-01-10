@@ -5,6 +5,7 @@
 #include <string>
 #include <mutex>
 #include <map>
+#include <list>
 #include <mysql_connection.h>    
 #include <mysql_driver.h>    
 #include <cppconn/exception.h>    
@@ -13,11 +14,10 @@
 #include <cppconn/resultset.h>    
 #include <cppconn/prepared_statement.h>    
 #include <cppconn/statement.h>      
-#include <list>
-#include "base/utils/noncopyable.hpp"
+#include <boost/noncopyable.hpp>
 #include "auth_group.hpp"
  
-class sync_db:cppbase::noncopyable
+class sync_db:boost::noncopyable
 {
 public:
 	//Constructor 

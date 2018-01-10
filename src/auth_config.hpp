@@ -6,12 +6,12 @@
 
 struct auth_config 
 {
-	bool parse(std::string &config_file);
+	bool init_auth_environment(const std::string &config_file);
+	bool init_log_environment(const std::string& log_cfg);
 
 	uint16_t port_;       //socket listen port
 	uint16_t thread_cnt_;
 
-	std::string log_level_;
 	std::string server_pwd_;//The cipher of the MD5 algorithm
 
 	std::string db_server_;

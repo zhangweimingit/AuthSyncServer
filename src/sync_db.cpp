@@ -5,11 +5,11 @@
 #include <stdio.h>    
 #include "sync_db.hpp"
 #include "auth_config.hpp"
-#include "base/utils/ik_logger.h"
+#include <boost/log/trivial.hpp>
 
 using namespace std;  
 using namespace sql;  
-using namespace cppbase;
+
 
 sync_db::sync_db(std::string url, std::string user, std::string password, int maxSize)
 	: url_(url), user_(user), password_(password), maxSize_(maxSize), curSize_(0),lock_()
@@ -127,13 +127,13 @@ void sync_db::insert(unsigned gid, const auth_info &auth)
 	}
 	catch (std::exception& e)
 	{
-		LOG_DBUG("insert into database error(%s)",e.what());
+		BOOST_LOG_TRIVIAL(error) << "insert into database error " << e.what();
 	}
 }
 
 void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 {
-	LOG_INFO("Load database begin");
+	BOOST_LOG_TRIVIAL(info) << "Load database begin";
 
 	const auth_config& config = boost::serialization::singleton<auth_config>::get_const_instance();
 
@@ -162,10 +162,10 @@ void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 			count++;
 		}
 		ReleaseConnection(conn);
-		LOG_INFO("Load %d record from database", count);
+		BOOST_LOG_TRIVIAL(info) << "Load  "<< count << "record from database";
 	}
 	catch (const std::exception&e)
 	{
-		LOG_DBUG("Load database error(%s)", e.what());
+		BOOST_LOG_TRIVIAL(fatal) << "Load database error:" << e.what();
 	}
 }

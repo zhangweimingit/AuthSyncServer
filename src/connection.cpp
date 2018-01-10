@@ -8,14 +8,12 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "connection.hpp"
 #include <stdexcept>
 #include <utility>
-#include "base/utils/pseudo_random.hpp"
-#include "base/utils/singleton.hpp"
-#include "base/utils/ik_logger.h"
+#include <boost/log/trivial.hpp>
 #include "auth_config.hpp"
 #include "server.hpp"
+#include "connection.hpp"
 
 using namespace std;
 using boost::asio::ip::tcp;
@@ -71,13 +69,13 @@ void connection::do_process(boost::asio::yield_context yield)
 				do_auth_response(yield);
 				break;
 			default:
-				LOG_ERRO("Conn(%s) send on invalid mst type", to_string().c_str());
+				BOOST_LOG_TRIVIAL(error) << "client " << to_string() << " send an invalid msg type";
 			}
 		}
 	}
 	catch (std::exception& e)
 	{
-		LOG_ERRO("socket closed because of %s", e.what());
+		BOOST_LOG_TRIVIAL(error) << "socket closed because of " << e.what();
 		if(certified_)
 			auth_group_->leave(shared_from_this());
 	}
@@ -92,11 +90,11 @@ void connection::do_check_client_response( boost::asio::yield_context& yield)
 		auth_group_ = &(sync_server_->group(auth_message_.server_chap_.gid_));
 		auth_group_->join(shared_from_this());
 		certified_ = true;
-		LOG_DBUG("Conn(%s) is certified  gid(%u)", to_string().c_str(), auth_message_.server_chap_.gid_);
+		BOOST_LOG_TRIVIAL(info) << "client  " << to_string() << " is certified ,gid is"  << auth_message_.server_chap_.gid_;
 	}
 	else
 	{
-		LOG_ERRO("Conn(%s) is already certified", to_string().c_str());
+		BOOST_LOG_TRIVIAL(error) << "client  " << to_string() << " is already certified";
 	}
 }
 
@@ -112,7 +110,7 @@ void connection::do_auth_response(boost::asio::yield_context& yield)
 	}
 	else
 	{
-		LOG_DBUG("Conn(%s) isn't authed, just ignore it", to_string().c_str());
+		BOOST_LOG_TRIVIAL(error) << "client  " << to_string() << " isn't authed, just ignore it";
 	}
 }
 

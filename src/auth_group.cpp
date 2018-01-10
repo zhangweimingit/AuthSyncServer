@@ -1,5 +1,5 @@
 #include "auth_group.hpp"
-#include "base/utils/ik_logger.h"
+#include <boost/log/trivial.hpp>
 using namespace std;
 
 void auth_group::join(connection_ptr participant)
@@ -19,14 +19,16 @@ void auth_group::join(connection_ptr participant)
 			participant->deliver((it++)->second);
 		}
      }
-	LOG_DBUG("conn(%s) join group", participant->to_string().c_str());
+
+	BOOST_LOG_TRIVIAL(info) << "client "<<  participant->to_string() << " join group";
 }
 
 void auth_group::leave(connection_ptr participant)
 {
 	lock_guard<mutex> lock(mutex_);
 	participants_.erase(participant);
-	LOG_DBUG("conn(%s) leave group", participant->to_string().c_str());
+
+	BOOST_LOG_TRIVIAL(info) << "client " << participant->to_string() << " leave group";
 }
 
 void auth_group::insert(const auth_info& auth)
@@ -37,7 +39,9 @@ void auth_group::insert(const auth_info& auth)
 
 	for (auto participant : participants_)
 		participant->deliver(auth);
-	LOG_DBUG("group recv new auth:mac(%s) attr(%u) duration(%u)", auth.mac_.c_str(), auth.attr_,auth.duration_);
+
+	BOOST_LOG_TRIVIAL(debug) << "group recv new auth:mac is" << auth.mac_ 
+		<< ",attr is " << auth.attr_ << ",duration is" << auth.duration_;
 }
 
 void auth_group::erase(const auth_info &auth)

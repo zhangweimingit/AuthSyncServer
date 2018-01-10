@@ -6,7 +6,7 @@
 #include <sstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include "base/algo/md5.hpp"
+#include "md5.hpp"
 
 using namespace std;
 using boost::serialization::singleton;
@@ -87,7 +87,7 @@ void auth_message::parse_check_client_res_msg()
 	}
 
 	uint8_t ret[16];
-	cppbase::MD5 md5;
+	md5 md5;
 	string comp = server_chap_.chap_str_ + config.server_pwd_;
 
 	md5.md5_once(const_cast<char*>(comp.data()), comp.size(), ret);

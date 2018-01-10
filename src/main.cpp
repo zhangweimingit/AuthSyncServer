@@ -1,23 +1,18 @@
 #include <unistd.h>
-#include <string.h>
-#include <libgen.h>
-
 #include <iostream>
 #include <string>
-
 #include <boost/program_options.hpp>
-
-#include "base/utils/ik_logger.h"
+#include <boost/log/trivial.hpp>
 
 #include "auth_config.hpp"
 #include "sync_db.hpp"
 #include "server.hpp"
 using namespace std;
-using namespace cppbase;
 namespace po = boost::program_options;
 using  boost::serialization::singleton;
 
 static void process_command(int argc, const char **argv);
+
 int main(int argc, const char **argv)
 {
 	process_command(argc, argv);
@@ -32,10 +27,10 @@ int main(int argc, const char **argv)
 	}
 	catch (const exception &e) 
 	{
-		LOG_ERRO("program exit exception:%s", e.what());
+		BOOST_LOG_TRIVIAL(fatal) << "program exit exception:" << e.what();
 	}
 
-	LOG_INFO("AuditSyncServer end");
+	BOOST_LOG_TRIVIAL(info) << "server shutdowm!!";
 	return 0; 
 }
 
@@ -45,10 +40,9 @@ static void process_command(int argc, const char **argv)
 
 	desc.add_options()
 		("help", "print help messages")
-		("config", po::value<string>()->default_value("conf/audit_sync.conf"), "Specify the config file")
-		("log", po::value<string>()->default_value("log/audit_sync"), "Specify the log file")
-		("daemon", "Running as daemon")
-		("verbose", "Show verbose output");
+		("config", po::value<string>()->default_value("conf/audit_sync.conf"), "Specify the auth config file")
+		("log", po::value<string>()->default_value("conf/log.conf"), "Specify the log conf file");
+
 
 	po::variables_map vm;
 	try
@@ -69,36 +63,22 @@ static void process_command(int argc, const char **argv)
 	}
 
 	string log_file_name = vm["log"].as<string>();
-	char *dir = strdup(log_file_name.c_str());
-	char *base = strdup(log_file_name.c_str());
-	if (log_init(dirname(dir), basename(base), D_INFO, 7, 4 * 1024)) 
-	{
-		cerr << "log_init failed" << endl;
-		exit(1);
-	}
-	free(dir);
-	free(base);
-
-	LOG_INFO("AuditSyncServer start");
 	string config_file_name = vm["config"].as<string>();
 	auth_config& config = singleton<auth_config>::get_mutable_instance();
 
-	if (!config.parse(config_file_name))
+	if (!config.init_auth_environment(config_file_name))
 	{
-		cerr << "parse_config_file failed" << endl;
+		cerr << "init auth environment" << endl;
 		exit(1);
 	}
 
-	reset_log_level(config.log_level_.c_str());
-	LOG_INFO("AuditSyncServer start 2");
-
-	if (vm.count("daemon"))
+	if (!config.init_log_environment(log_file_name))
 	{
-		if (daemon(1, 1))
-		{
-			LOG_ERRO("daemon failed");
-			exit(1);
-		}
-		LOG_INFO("AuditSyncServer become a daemon service");
+		cerr << "init log environment" << endl;
+		exit(1);
 	}
+
+	BOOST_LOG_TRIVIAL(info) << "init program environment success!!";
+
+	daemon(1, 0);
 }
