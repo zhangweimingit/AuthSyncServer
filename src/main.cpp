@@ -82,7 +82,8 @@ static void process_command(int argc, const char **argv)
 
 	if (daemon(1, 0))
 	{
-		BOOST_LOG_TRIVIAL(info) << "daemon" ;
+		BOOST_LOG_TRIVIAL(fatal) << "daemon failed" ;
+		exit(1);
 	}
 
 	BOOST_LOG_TRIVIAL(info) << "process command success!!";
