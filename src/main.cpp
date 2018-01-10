@@ -80,7 +80,10 @@ static void process_command(int argc, const char **argv)
 
 	cout << "program going to run as daemon..." << endl;
 
-	int ll = daemon(1, 0);
+	if (daemon(1, 0))
+	{
+		BOOST_LOG_TRIVIAL(info) << "daemon" ;
+	}
 
-	BOOST_LOG_TRIVIAL(info) << "process command success!!" << ll;
+	BOOST_LOG_TRIVIAL(info) << "process command success!!";
 }
