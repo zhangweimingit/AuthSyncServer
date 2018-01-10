@@ -32,6 +32,7 @@ server::server(const size_t port, size_t thread_pool_size,sync_db& db)
 	signals_.async_wait(bind(&server::handle_stop, this));
 
 	start_accept();
+	BOOST_LOG_TRIVIAL(info) << "server begin to accept client...";
 }
 
 void server::run()
@@ -77,6 +78,7 @@ void server::handle_accept(const boost::system::error_code& e)
 	{
 		auto conn = std::make_shared<connection>(std::move(socket_),this);
 		conn->start();
+		BOOST_LOG_TRIVIAL(info) << "new client arrived!!";
 	}
 
 	start_accept();
