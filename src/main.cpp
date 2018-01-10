@@ -78,7 +78,11 @@ static void process_command(int argc, const char **argv)
 		exit(1);
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "init program environment success!!";
+	cout << "program going to run as daemon..." << endl;
 
-	daemon(1, 0);
+	if(daemon(1, 0));
+	{
+		cout << "daemon failed!!!" << endl;
+		exit(1);
+	}
 }
