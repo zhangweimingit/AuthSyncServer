@@ -29,7 +29,7 @@ int main(int argc, const char **argv)
 	{
 		BOOST_LOG_TRIVIAL(fatal) << "program exit exception:" << e.what();
 	}
-
+	BOOST_LOG_TRIVIAL(fatal) << "program exit exception:";
 	BOOST_LOG_TRIVIAL(info) << "server shutdowm!!";
 	return 0; 
 }
