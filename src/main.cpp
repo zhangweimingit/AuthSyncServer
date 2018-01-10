@@ -80,9 +80,5 @@ static void process_command(int argc, const char **argv)
 
 	cout << "program going to run as daemon..." << endl;
 
-	if(daemon(1, 1));
-	{
-		cout << "daemon failed!!!" << endl;
-		exit(1);
-	}
+	(void)daemon(1, 0);
 }
