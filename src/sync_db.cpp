@@ -162,7 +162,7 @@ void sync_db::load_auth_info(std::map<unsigned, auth_group>& memory_db)
 			count++;
 		}
 		ReleaseConnection(conn);
-		BOOST_LOG_TRIVIAL(info) << "Load  "<< count << "record from database";
+		BOOST_LOG_TRIVIAL(info) << "Load "<< count << " record from database";
 	}
 	catch (const std::exception&e)
 	{
