@@ -18,7 +18,7 @@ int main(int argc, const char **argv)
 	process_command(argc, argv);
 
 	const auth_config& config = singleton<auth_config>::get_const_instance();
-	BOOST_LOG_TRIVIAL(fatal) << "program exit exception:";
+
 	try
 	{
 		sync_db database(config.db_server_, config.db_user_, config.db_pwd_, config.thread_cnt_);
