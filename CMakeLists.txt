@@ -20,7 +20,7 @@ find_library(CRYPTO_LIB libcrypto.a REQUIRED)
 find_library(MYSQL_CONN_LIB libmysqlcppconn.so REQUIRED)
 
 # compile options
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DBOOST_LOG_DYN_LINK")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DBOOST_LOG_DYN_LINK -DBOOST_COROUTINES_NO_DEPRECATION_WARNING")
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2")
 
