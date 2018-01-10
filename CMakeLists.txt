@@ -15,7 +15,6 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
 endif()
 
 find_package(Boost REQUIRED COMPONENTS program_options system coroutine context filesystem log log_setup)
-find_library(SSL_LIB libssl.a REQUIRED)
 find_library(CRYPTO_LIB libcrypto.a REQUIRED)
 find_library(MYSQL_CONN_LIB libmysqlcppconn.so REQUIRED)
 
@@ -30,7 +29,6 @@ add_executable(ik_auth_ss ${DIR_SRCS})
 target_link_libraries(ik_auth_ss
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
-    ${SSL_LIB}
     ${CRYPTO_LIB}
     ${MYSQL_CONN_LIB}
     )
